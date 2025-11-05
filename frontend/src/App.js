@@ -64,7 +64,7 @@ function App() {
               ☰
             </button>
           </div>
-          <div className="nav-links" style={{ display: showMobileMenu ? 'flex' : 'flex' }}>
+          <div className="nav-links" style={{ display: showMobileMenu ? 'flex' : undefined }}>
             <a href="/">Dashboard</a>
             <a href="/contas">Contas a Pagar</a>
             <a href="/cartoes">Cartões</a>
