@@ -143,13 +143,9 @@ public class ContaPagarController {
             conta.setUsuario(usuario);
             conta.setCategoria(categoria);
             
-            conta.setDiaVencimento(Integer.valueOf(dados.get("diaVencimento").toString()));
-            
-            LocalDate hoje = LocalDate.now();
-            LocalDate proximoMes = hoje.plusMonths(1);
-            int diaVenc = conta.getDiaVencimento();
-            int ultimoDiaMes = proximoMes.lengthOfMonth();
-            conta.setDataVencimento(proximoMes.withDayOfMonth(Math.min(diaVenc, ultimoDiaMes)));
+            LocalDate dataVencimento = LocalDate.parse(dados.get("dataVencimento").toString());
+            conta.setDataVencimento(dataVencimento);
+            conta.setDiaVencimento(dataVencimento.getDayOfMonth());
             
             ContaPagar contaSalva = contaRepository.save(conta);
             System.out.println("Conta salva com ID: " + contaSalva.getId());
@@ -172,13 +168,9 @@ public class ContaPagarController {
             conta.setRecorrente(Boolean.parseBoolean(dados.get("recorrente").toString()));
             conta.setCategoria(categoria);
             
-            conta.setDiaVencimento(Integer.valueOf(dados.get("diaVencimento").toString()));
-            
-            // Manter a data de vencimento no mesmo mês
-            LocalDate dataAtual = conta.getDataVencimento();
-            int diaVenc = conta.getDiaVencimento();
-            int ultimoDiaMes = dataAtual.lengthOfMonth();
-            conta.setDataVencimento(dataAtual.withDayOfMonth(Math.min(diaVenc, ultimoDiaMes)));
+            LocalDate dataVencimento = LocalDate.parse(dados.get("dataVencimento").toString());
+            conta.setDataVencimento(dataVencimento);
+            conta.setDiaVencimento(dataVencimento.getDayOfMonth());
             
             contaRepository.save(conta);
             return ResponseEntity.ok(Map.of("success", true));

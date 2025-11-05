@@ -13,7 +13,7 @@ function ContasPagar() {
   const [formData, setFormData] = useState({
     descricao: '',
     valor: '',
-    diaVencimento: '',
+    dataVencimento: '',
     categoriaId: '',
     recorrente: false
   });
@@ -29,7 +29,7 @@ function ContasPagar() {
   const carregarContas = async () => {
     try {
       const response = await api.get(`/api/contas?username=${user}`);
-      setContas(response.data.filter(c => !c.pago));
+      setContas(response.data);
     } catch (error) {
       console.error('Erro ao carregar contas:', error);
     }
@@ -84,7 +84,7 @@ function ContasPagar() {
       setFormData({
         descricao: '',
         valor: '',
-        diaVencimento: '',
+        dataVencimento: '',
         categoriaId: '',
         recorrente: false
       });
@@ -291,13 +291,11 @@ function ContasPagar() {
                 </select>
               </div>
               <div>
-                <label>Dia do Vencimento (1-31):</label>
+                <label>Data de Vencimento:</label>
                 <input
-                  type="number"
-                  min="1"
-                  max="31"
-                  value={formData.diaVencimento}
-                  onChange={(e) => setFormData({...formData, diaVencimento: e.target.value})}
+                  type="date"
+                  value={formData.dataVencimento}
+                  onChange={(e) => setFormData({...formData, dataVencimento: e.target.value})}
                   required
                 />
               </div>
@@ -325,7 +323,7 @@ function ContasPagar() {
                 setFormData({
                   descricao: '',
                   valor: '',
-                  diaVencimento: '',
+                  dataVencimento: '',
                   categoriaId: '',
                   recorrente: false
                 });
@@ -398,32 +396,28 @@ function ContasPagar() {
                           Pagar
                         </button>
                       )}
-                      {conta.tipo !== 'FATURA_CARTAO' && (
-                        <>
-                          <button 
-                            onClick={() => {
-                              setEditingConta(conta);
-                              setFormData({
-                                descricao: conta.descricao,
-                                valor: conta.valor,
-                                diaVencimento: conta.diaVencimento || '',
-                                categoriaId: conta.categoria.id,
-                                recorrente: conta.recorrente
-                              });
-                              setShowForm(true);
-                            }}
-                            style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                          >
-                            Editar
-                          </button>
-                          <button 
-                            onClick={() => excluirConta(conta.id)}
-                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '4px' }}
-                          >
-                            Excluir
-                          </button>
-                        </>
-                      )}
+                      <button 
+                        onClick={() => {
+                          setEditingConta(conta);
+                          setFormData({
+                            descricao: conta.descricao,
+                            valor: conta.valor,
+                            dataVencimento: conta.dataVencimento,
+                            categoriaId: conta.categoria.id,
+                            recorrente: conta.recorrente
+                          });
+                          setShowForm(true);
+                        }}
+                        style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                      >
+                        Editar
+                      </button>
+                      <button 
+                        onClick={() => excluirConta(conta.id)}
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '4px' }}
+                      >
+                        Excluir
+                      </button>
                     </td>
                   </tr>
                 ))}
