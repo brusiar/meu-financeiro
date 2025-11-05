@@ -96,10 +96,13 @@ public class ContaPagarController {
             LocalDate inicio = hoje.withDayOfMonth(1);
             LocalDate fim = hoje.withDayOfMonth(hoje.lengthOfMonth());
             
+            System.out.println("Buscando contas entre " + inicio + " e " + fim);
             var contasMes = contaRepository.findByUsuarioUsernameAndDataVencimentoBetweenOrderByDataVencimentoAsc(username, inicio, fim);
+            System.out.println("Total de contas no mês: " + contasMes.size());
             
             var pendentes = contasMes.stream().filter(c -> !c.isPago()).toList();
             var pagas = contasMes.stream().filter(ContaPagar::isPago).toList();
+            System.out.println("Pendentes: " + pendentes.size() + ", Pagas: " + pagas.size());
             
             var totalPendente = pendentes.stream()
                 .map(ContaPagar::getValor)
