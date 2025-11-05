@@ -87,8 +87,6 @@ function Login({ onLogin }) {
         
         <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem', color: '#666' }}>
           <p>Sistema de Finanças Pessoais</p>
-          <p><strong>Usuário:</strong> admin</p>
-          <p><strong>Senha:</strong> admin123</p>
         </div>
       </div>
     </div>
