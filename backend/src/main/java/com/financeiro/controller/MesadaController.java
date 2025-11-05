@@ -103,9 +103,24 @@ public class MesadaController {
             acao.setDescricao(dados.get("descricao").toString());
             acao.setValor(new BigDecimal(dados.get("valor").toString()));
             acao.setTipo(AcaoMesada.TipoAcao.valueOf(dados.get("tipo").toString()));
-            acao.setData(LocalDate.now());
+            acao.setData(dados.containsKey("data") ? LocalDate.parse(dados.get("data").toString()) : LocalDate.now());
             acao.setPessoa(pessoa);
             
+            acaoRepository.save(acao);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/acoes/{id}")
+    public ResponseEntity<?> atualizarAcao(@PathVariable Long id, @RequestBody Map<String, Object> dados) {
+        try {
+            AcaoMesada acao = acaoRepository.findById(id).orElseThrow();
+            acao.setDescricao(dados.get("descricao").toString());
+            acao.setValor(new BigDecimal(dados.get("valor").toString()));
+            acao.setTipo(AcaoMesada.TipoAcao.valueOf(dados.get("tipo").toString()));
+            acao.setData(LocalDate.parse(dados.get("data").toString()));
             acaoRepository.save(acao);
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {

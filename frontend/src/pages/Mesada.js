@@ -10,8 +10,9 @@ function Mesada() {
   const [showRelatorio, setShowRelatorio] = useState(false);
   const [relatorio, setRelatorio] = useState(null);
   const [editingPessoa, setEditingPessoa] = useState(null);
+  const [editingAcao, setEditingAcao] = useState(null);
   const [formPessoa, setFormPessoa] = useState({ nome: '', valorMesada: '' });
-  const [formAcao, setFormAcao] = useState({ descricao: '', valor: '', tipo: 'ACRESCIMO' });
+  const [formAcao, setFormAcao] = useState({ descricao: '', valor: '', tipo: 'ACRESCIMO', data: new Date().toISOString().split('T')[0] });
 
   const user = localStorage.getItem('user');
 
@@ -59,13 +60,19 @@ function Mesada() {
   const salvarAcao = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/api/mesada/acoes', { ...formAcao, pessoaId: pessoaSelecionada.id });
-      alert('Ação registrada com sucesso!');
+      if (editingAcao) {
+        await api.put(`/api/mesada/acoes/${editingAcao.id}`, formAcao);
+        alert('Ação atualizada com sucesso!');
+      } else {
+        await api.post('/api/mesada/acoes', { ...formAcao, pessoaId: pessoaSelecionada.id });
+        alert('Ação registrada com sucesso!');
+      }
       setShowFormAcao(false);
-      setFormAcao({ descricao: '', valor: '', tipo: 'ACRESCIMO' });
+      setEditingAcao(null);
+      setFormAcao({ descricao: '', valor: '', tipo: 'ACRESCIMO', data: new Date().toISOString().split('T')[0] });
       carregarAcoes(pessoaSelecionada.id);
     } catch (error) {
-      alert('Erro ao registrar ação');
+      alert('Erro ao salvar ação');
     }
   };
 
@@ -224,9 +231,9 @@ function Mesada() {
 
         {showFormAcao && (
           <div className="card" style={{ marginBottom: '1rem' }}>
-            <h3>Nova Ação</h3>
+            <h3>{editingAcao ? 'Editar' : 'Nova'} Ação</h3>
             <form onSubmit={salvarAcao}>
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                 <div>
                   <label>Descrição:</label>
                   <input type="text" value={formAcao.descricao} onChange={(e) => setFormAcao({...formAcao, descricao: e.target.value})} required />
@@ -242,9 +249,13 @@ function Mesada() {
                     <option value="DESCONTO">Desconto</option>
                   </select>
                 </div>
+                <div>
+                  <label>Data:</label>
+                  <input type="date" value={formAcao.data} onChange={(e) => setFormAcao({...formAcao, data: e.target.value})} required />
+                </div>
               </div>
-              <button type="submit" className="btn" style={{ marginRight: '0.5rem' }}>Salvar</button>
-              <button type="button" className="btn" onClick={() => { setShowFormAcao(false); setFormAcao({ descricao: '', valor: '', tipo: 'ACRESCIMO' }); }}>Cancelar</button>
+              <button type="submit" className="btn" style={{ marginRight: '0.5rem' }}>{editingAcao ? 'Atualizar' : 'Salvar'}</button>
+              <button type="button" className="btn" onClick={() => { setShowFormAcao(false); setEditingAcao(null); setFormAcao({ descricao: '', valor: '', tipo: 'ACRESCIMO', data: new Date().toISOString().split('T')[0] }); }}>Cancelar</button>
             </form>
           </div>
         )}
@@ -276,6 +287,9 @@ function Mesada() {
                       R$ {parseFloat(acao.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
                     <td style={{ padding: '0.5rem', textAlign: 'center' }}>
+                      <button onClick={() => { setEditingAcao(acao); setFormAcao({ descricao: acao.descricao, valor: acao.valor, tipo: acao.tipo, data: acao.data }); setShowFormAcao(true); }} style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}>
+                        Editar
+                      </button>
                       <button onClick={() => excluirAcao(acao.id)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '4px' }}>
                         Excluir
                       </button>
