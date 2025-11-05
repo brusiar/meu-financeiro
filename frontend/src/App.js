@@ -15,6 +15,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showConfigMenu, setShowConfigMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -45,8 +46,25 @@ function App() {
     <Router>
       <div className="App">
         <nav className="navbar">
-          <h1>Meu Financeiro</h1>
-          <div className="nav-links">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <h1>Meu Financeiro</h1>
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              style={{
+                display: 'none',
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                fontSize: '1.5rem',
+                cursor: 'pointer',
+                padding: '0.5rem'
+              }}
+              className="mobile-menu-btn"
+            >
+              ☰
+            </button>
+          </div>
+          <div className="nav-links" style={{ display: showMobileMenu ? 'flex' : 'flex' }}>
             <a href="/">Dashboard</a>
             <a href="/contas">Contas a Pagar</a>
             <a href="/cartoes">Cartões</a>
