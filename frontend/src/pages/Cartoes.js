@@ -228,7 +228,7 @@ function Cartoes() {
                   {gastosFatura.map(gasto => (
                     <tr key={gasto.id} style={{ borderBottom: '1px solid #eee' }}>
                       <td style={{ padding: '0.5rem' }}>
-                        {new Date(gasto.dataGasto + 'T00:00:00').toLocaleDateString('pt-BR')}
+                        {new Date(gasto.dataGasto).toLocaleDateString('pt-BR')}
                       </td>
                       <td style={{ padding: '0.5rem' }}>{gasto.estabelecimento}</td>
                       <td style={{ padding: '0.5rem' }}>{gasto.categoria}</td>
@@ -483,7 +483,7 @@ function Cartoes() {
                   {gastos.map(gasto => (
                     <tr key={gasto.id} style={{ borderBottom: '1px solid #eee' }}>
                       <td style={{ padding: '0.5rem' }}>
-                        {new Date(gasto.dataGasto + 'T00:00:00').toLocaleDateString('pt-BR')}
+                        {new Date(gasto.dataGasto).toLocaleDateString('pt-BR')}
                       </td>
                       <td style={{ padding: '0.5rem' }}>{gasto.estabelecimento}</td>
                       <td style={{ padding: '0.5rem' }}>{gasto.categoria.nome}</td>
