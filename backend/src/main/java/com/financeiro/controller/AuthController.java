@@ -35,4 +35,12 @@ public class AuthController {
         response.put("message", "Usuário ou senha inválidos");
         return ResponseEntity.status(401).body(response);
     }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<Map<String, Object>> changePassword(@RequestBody Map<String, String> data) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", false);
+        response.put("message", "Alteração de senha não implementada. Altere no arquivo application.yml");
+        return ResponseEntity.status(501).body(response);
+    }
 }
