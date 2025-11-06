@@ -79,13 +79,14 @@ function App() {
             </button>
           </div>
           <div className="nav-links" style={{ display: showMobileMenu ? 'flex' : undefined }}>
-            <a href="/">Home</a>
-            <a href="/contas">Contas</a>
-            <a href="/cartoes">Cartões</a>
-            <a href="/dividas">Dívidas</a>
-            <a href="/rendimentos">Rendimentos</a>
+            {userRole !== 'MESADA' && <a href="/">Home</a>}
+            {userRole !== 'MESADA' && <a href="/contas">Contas</a>}
+            {userRole !== 'MESADA' && <a href="/cartoes">Cartões</a>}
+            {userRole !== 'MESADA' && <a href="/dividas">Dívidas</a>}
+            {userRole !== 'MESADA' && <a href="/rendimentos">Rendimentos</a>}
             <a href="/mesada">Mesada</a>
-            <div style={{ position: 'relative', display: 'inline-block' }}>
+            {userRole === 'ADMIN' && <a href="/usuarios">Usuários</a>}
+            {userRole !== 'MESADA' && <div style={{ position: 'relative', display: 'inline-block' }}>
               <button
                 onClick={() => setShowConfigMenu(!showConfigMenu)}
                 style={{
@@ -130,7 +131,7 @@ function App() {
                   </a>
                 </div>
               )}
-            </div>
+            </div>}
             <button 
               onClick={handleLogout}
               style={{ 
