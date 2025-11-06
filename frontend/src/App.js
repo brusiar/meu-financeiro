@@ -85,7 +85,6 @@ function App() {
             {userRole !== 'MESADA' && <a href="/dividas">Dívidas</a>}
             {userRole !== 'MESADA' && <a href="/rendimentos">Rendimentos</a>}
             <a href="/mesada">Mesada</a>
-            {userRole === 'ADMIN' && <a href="/usuarios">Usuários</a>}
             {userRole !== 'MESADA' && <div style={{ position: 'relative', display: 'inline-block' }}>
               <button
                 onClick={() => setShowConfigMenu(!showConfigMenu)}
@@ -129,6 +128,21 @@ function App() {
                   >
                     Categorias
                   </a>
+                  {userRole === 'ADMIN' && (
+                    <a
+                      href="/usuarios"
+                      style={{
+                        display: 'block',
+                        padding: '0.75rem 1rem',
+                        color: '#333',
+                        textDecoration: 'none'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                    >
+                      Usuários
+                    </a>
+                  )}
                 </div>
               )}
             </div>}
