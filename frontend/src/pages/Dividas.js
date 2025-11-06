@@ -200,6 +200,12 @@ function Dividas() {
   const totalValorOriginal = dividas.reduce((sum, d) => sum + parseFloat(d.valorTotal), 0);
   const totalPago = totalValorOriginal - totalSaldoDevedor;
   const percentualPago = totalValorOriginal > 0 ? (totalPago / totalValorOriginal) * 100 : 0;
+  
+  const dividaPrioritaria = dividas.length > 0 ? dividas.reduce((max, d) => {
+    const taxaMax = parseFloat(max.taxaJuros);
+    const taxaAtual = parseFloat(d.taxaJuros);
+    return taxaAtual > taxaMax ? d : max;
+  }) : null;
 
   return (
     <div>
@@ -207,6 +213,22 @@ function Dividas() {
         <h2>Dívidas</h2>
         <button className="btn" onClick={() => setShowForm(true)}>Nova Dívida</button>
       </div>
+
+      {/* Alerta de Priorização */}
+      {dividaPrioritaria && (
+        <div className="card" style={{ marginBottom: '2rem', backgroundColor: '#fff3cd', borderLeft: '4px solid #f39c12' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span style={{ fontSize: '2rem' }}>⚠️</span>
+            <div>
+              <p style={{ margin: 0, fontWeight: 'bold', color: '#856404', fontSize: '1.1rem' }}>Priorize esta dívida!</p>
+              <p style={{ margin: '0.5rem 0 0 0', color: '#856404' }}>
+                <strong>{dividaPrioritaria.instituicao}</strong> possui a maior taxa de juros: <strong>{parseFloat(dividaPrioritaria.taxaJuros).toFixed(2)}% {dividaPrioritaria.tipoTaxa === 'MENSAL' ? 'a.m.' : 'a.a.'}</strong>
+                {dividaPrioritaria.saldoDevedor && ` - Saldo devedor: R$ ${parseFloat(dividaPrioritaria.saldoDevedor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Dashboard Resumo */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
