@@ -52,7 +52,7 @@ public class UsuarioController {
             usuario.setPassword(passwordEncoder.encode(dados.get("password").toString()));
             usuario.setRole(Usuario.Role.valueOf(dados.get("role").toString()));
             
-            if (dados.containsKey("pessoaMesadaId") && dados.get("pessoaMesadaId") != null) {
+            if (dados.containsKey("pessoaMesadaId") && dados.get("pessoaMesadaId") != null && !dados.get("pessoaMesadaId").toString().isEmpty()) {
                 var pessoa = pessoaRepository.findById(Long.valueOf(dados.get("pessoaMesadaId").toString())).orElseThrow();
                 usuario.setPessoaMesada(pessoa);
             }
