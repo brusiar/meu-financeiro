@@ -24,6 +24,7 @@ function Usuarios() {
   const carregarUsuarios = async () => {
     try {
       const response = await api.get('/api/usuarios');
+      console.log('Usuários carregados:', response.data);
       setUsuarios(response.data);
     } catch (error) {
       console.error('Erro ao carregar usuários:', error);
