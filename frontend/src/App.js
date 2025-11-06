@@ -82,7 +82,8 @@ function App() {
                   fontSize: '1rem',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem'
+                  gap: '0.5rem',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 Ajustes {showConfigMenu ? '▲' : '▼'}
