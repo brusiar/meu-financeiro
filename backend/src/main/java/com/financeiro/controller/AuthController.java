@@ -29,6 +29,7 @@ public class AuthController {
         String user = credentials.get("username");
         String pass = credentials.get("password");
         
+        // Verifica admin padrão
         if (username.equals(user) && password.equals(pass)) {
             var usuario = usuarioRepository.findByUsername(user);
             response.put("success", true);
@@ -37,6 +38,20 @@ public class AuthController {
             response.put("pessoaMesada", usuario.isPresent() && usuario.get().getPessoaMesada() != null ? 
                 Map.of("id", usuario.get().getPessoaMesada().getId(), "nome", usuario.get().getPessoaMesada().getNome()) : null);
             return ResponseEntity.ok(response);
+        }
+        
+        // Verifica usuários do banco
+        var usuarioOpt = usuarioRepository.findByUsername(user);
+        if (usuarioOpt.isPresent()) {
+            var usuario = usuarioOpt.get();
+            if (usuario.getPassword().equals(pass)) {
+                response.put("success", true);
+                response.put("user", user);
+                response.put("role", usuario.getRole().toString());
+                response.put("pessoaMesada", usuario.getPessoaMesada() != null ? 
+                    Map.of("id", usuario.getPessoaMesada().getId(), "nome", usuario.getPessoaMesada().getNome()) : null);
+                return ResponseEntity.ok(response);
+            }
         }
         
         response.put("success", false);
