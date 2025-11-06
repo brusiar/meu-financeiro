@@ -3,6 +3,7 @@ package com.financeiro.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -21,6 +22,9 @@ public class AuthController {
 
     @Autowired
     private com.financeiro.repository.UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> credentials) {
@@ -44,7 +48,7 @@ public class AuthController {
         var usuarioOpt = usuarioRepository.findByUsername(user);
         if (usuarioOpt.isPresent()) {
             var usuario = usuarioOpt.get();
-            if (usuario.getPassword().equals(pass)) {
+            if (passwordEncoder.matches(pass, usuario.getPassword())) {
                 response.put("success", true);
                 response.put("user", user);
                 response.put("role", usuario.getRole().toString());
