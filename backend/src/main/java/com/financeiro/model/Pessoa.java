@@ -1,5 +1,6 @@
 package com.financeiro.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
@@ -16,6 +17,7 @@ public class Pessoa {
     
     @ManyToOne
     @JoinColumn(name = "usuario_id")
+    @JsonIgnore
     private Usuario usuario;
 
     public Long getId() {
