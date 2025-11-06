@@ -3,6 +3,7 @@ import api from '../services/api';
 
 function Dividas() {
   const [dividas, setDividas] = useState([]);
+  const [rendimentos, setRendimentos] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingDivida, setEditingDivida] = useState(null);
   const [selectedDivida, setSelectedDivida] = useState(null);
@@ -25,6 +26,7 @@ function Dividas() {
 
   useEffect(() => {
     carregarDividas();
+    carregarRendimentos();
   }, []);
 
   const carregarDividas = async () => {
@@ -33,6 +35,15 @@ function Dividas() {
       setDividas(response.data);
     } catch (error) {
       console.error('Erro ao carregar dívidas:', error);
+    }
+  };
+
+  const carregarRendimentos = async () => {
+    try {
+      const response = await api.get(`/api/rendimentos?username=${user}`);
+      setRendimentos(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar rendimentos:', error);
     }
   };
 
@@ -183,12 +194,127 @@ function Dividas() {
     );
   }
 
+  const totalSaldoDevedor = dividas.reduce((sum, d) => sum + parseFloat(d.saldoDevedor), 0);
+  const totalParcelas = dividas.reduce((sum, d) => sum + (d.valorParcela ? parseFloat(d.valorParcela) : 0), 0);
+  const totalRendimentos = rendimentos.reduce((sum, r) => sum + parseFloat(r.valor), 0);
+  const totalValorOriginal = dividas.reduce((sum, d) => sum + parseFloat(d.valorTotal), 0);
+  const totalPago = totalValorOriginal - totalSaldoDevedor;
+  const percentualPago = totalValorOriginal > 0 ? (totalPago / totalValorOriginal) * 100 : 0;
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
         <h2>Dívidas</h2>
         <button className="btn" onClick={() => setShowForm(true)}>Nova Dívida</button>
       </div>
+
+      {/* Dashboard Resumo */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+        <div className="card" style={{ textAlign: 'center', backgroundColor: '#f8d7da' }}>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: '#721c24' }}>Saldo Devedor Total</p>
+          <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#e74c3c', margin: '0.5rem 0' }}>
+            R$ {totalSaldoDevedor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </p>
+        </div>
+        <div className="card" style={{ textAlign: 'center', backgroundColor: '#d1ecf1' }}>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: '#0c5460' }}>Total de Parcelas</p>
+          <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#17a2b8', margin: '0.5rem 0' }}>
+            R$ {totalParcelas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </p>
+        </div>
+        <div className="card" style={{ textAlign: 'center', backgroundColor: '#d4edda' }}>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: '#155724' }}>Rendimentos Mensais</p>
+          <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#27ae60', margin: '0.5rem 0' }}>
+            R$ {totalRendimentos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </p>
+        </div>
+        <div className="card" style={{ textAlign: 'center', backgroundColor: '#fff3cd' }}>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: '#856404' }}>Comprometimento</p>
+          <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#f39c12', margin: '0.5rem 0' }}>
+            {totalRendimentos > 0 ? ((totalParcelas / totalRendimentos) * 100).toFixed(1) : 0}%
+          </p>
+        </div>
+      </div>
+
+      {/* Gráfico Progresso Geral */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <h3>Progresso de Quitação Geral</h3>
+        <div style={{ marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+            <span>Pago: R$ {totalPago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+            <span>Restante: R$ {totalSaldoDevedor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+          </div>
+          <div style={{ height: '40px', backgroundColor: '#f0f0f0', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ height: '100%', width: `${percentualPago}%`, backgroundColor: '#27ae60', transition: 'width 0.3s ease' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: percentualPago > 50 ? 'white' : '#333' }}>
+              {percentualPago.toFixed(1)}% quitado
+            </div>
+          </div>
+        </div>
+        <p style={{ textAlign: 'center', color: '#666', fontSize: '0.9rem' }}>
+          Total Original: R$ {totalValorOriginal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+        </p>
+      </div>
+
+      {/* Gráfico por Dívida */}
+      {dividas.length > 0 && (
+        <div className="card" style={{ marginBottom: '2rem' }}>
+          <h3>Progresso por Dívida</h3>
+          <div style={{ display: 'grid', gap: '1.5rem' }}>
+            {dividas.map(divida => {
+              const pago = parseFloat(divida.valorTotal) - parseFloat(divida.saldoDevedor);
+              const percentual = (pago / parseFloat(divida.valorTotal)) * 100;
+              return (
+                <div key={divida.id}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <strong>{divida.instituicao}</strong>
+                    <span>{percentual.toFixed(1)}%</span>
+                  </div>
+                  <div style={{ height: '30px', backgroundColor: '#f0f0f0', borderRadius: '4px', overflow: 'hidden', position: 'relative' }}>
+                    <div style={{ height: '100%', width: `${percentual}%`, backgroundColor: '#3498db', transition: 'width 0.3s ease' }} />
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', paddingLeft: '10px', fontSize: '0.85rem', fontWeight: 'bold', color: percentual > 50 ? 'white' : '#333' }}>
+                      R$ {parseFloat(divida.saldoDevedor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} restante
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Comparação Parcelas vs Rendimentos */}
+      {totalParcelas > 0 && totalRendimentos > 0 && (
+        <div className="card" style={{ marginBottom: '2rem' }}>
+          <h3>Parcelas vs Rendimentos</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div>
+              <p style={{ textAlign: 'center', marginBottom: '0.5rem', fontWeight: 'bold', color: '#17a2b8' }}>Parcelas</p>
+              <div style={{ height: '200px', backgroundColor: '#17a2b8', borderRadius: '8px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                  R$ {totalParcelas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              </div>
+            </div>
+            <div>
+              <p style={{ textAlign: 'center', marginBottom: '0.5rem', fontWeight: 'bold', color: '#27ae60' }}>Rendimentos</p>
+              <div style={{ height: '200px', backgroundColor: '#27ae60', borderRadius: '8px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                  R$ {totalRendimentos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              </div>
+            </div>
+          </div>
+          <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '1.1rem', fontWeight: 'bold', color: totalParcelas > totalRendimentos ? '#e74c3c' : '#27ae60' }}>
+            {totalParcelas > totalRendimentos 
+              ? `⚠️ Parcelas excedem rendimentos em R$ ${(totalParcelas - totalRendimentos).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+              : `✅ Sobra de R$ ${(totalRendimentos - totalParcelas).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} após parcelas`
+            }
+          </p>
+        </div>
+      )}
+
+      <h3 style={{ marginTop: '2rem', marginBottom: '1rem' }}>Minhas Dívidas</h3>
 
       {showForm && (
         <div className="card" style={{ marginBottom: '1rem' }}>
@@ -249,7 +375,7 @@ function Dividas() {
         ))}
       </div>
 
-      {dividas.length === 0 && (
+      {dividas.length === 0 && !showForm && (
         <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
           <p>Nenhuma dívida cadastrada</p>
         </div>
