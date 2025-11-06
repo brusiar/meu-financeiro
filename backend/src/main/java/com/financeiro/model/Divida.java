@@ -18,6 +18,7 @@ public class Divida {
     @Enumerated(EnumType.STRING)
     private TipoTaxa tipoTaxa;
     
+    private BigDecimal valorParcela;
     private BigDecimal saldoDevedor;
     private LocalDate dataCadastro;
 
@@ -44,6 +45,9 @@ public class Divida {
 
     public TipoTaxa getTipoTaxa() { return tipoTaxa; }
     public void setTipoTaxa(TipoTaxa tipoTaxa) { this.tipoTaxa = tipoTaxa; }
+
+    public BigDecimal getValorParcela() { return valorParcela; }
+    public void setValorParcela(BigDecimal valorParcela) { this.valorParcela = valorParcela; }
 
     public BigDecimal getSaldoDevedor() { return saldoDevedor; }
     public void setSaldoDevedor(BigDecimal saldoDevedor) { this.saldoDevedor = saldoDevedor; }

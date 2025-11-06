@@ -48,6 +48,7 @@ public class DividaController {
             divida.setValorTotal(new BigDecimal(dados.get("valorTotal").toString()));
             divida.setTaxaJuros(new BigDecimal(dados.get("taxaJuros").toString()));
             divida.setTipoTaxa(Divida.TipoTaxa.valueOf(dados.get("tipoTaxa").toString()));
+            divida.setValorParcela(dados.containsKey("valorParcela") && !dados.get("valorParcela").toString().isEmpty() ? new BigDecimal(dados.get("valorParcela").toString()) : null);
             divida.setSaldoDevedor(new BigDecimal(dados.get("saldoDevedor").toString()));
             divida.setDataCadastro(LocalDate.now());
             divida.setUsuario(usuario);
@@ -67,6 +68,7 @@ public class DividaController {
             divida.setValorTotal(new BigDecimal(dados.get("valorTotal").toString()));
             divida.setTaxaJuros(new BigDecimal(dados.get("taxaJuros").toString()));
             divida.setTipoTaxa(Divida.TipoTaxa.valueOf(dados.get("tipoTaxa").toString()));
+            divida.setValorParcela(dados.containsKey("valorParcela") && !dados.get("valorParcela").toString().isEmpty() ? new BigDecimal(dados.get("valorParcela").toString()) : null);
             divida.setSaldoDevedor(new BigDecimal(dados.get("saldoDevedor").toString()));
             dividaRepository.save(divida);
             return ResponseEntity.ok(Map.of("success", true));

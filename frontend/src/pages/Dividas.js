@@ -13,6 +13,7 @@ function Dividas() {
     valorTotal: '',
     taxaJuros: '',
     tipoTaxa: 'MENSAL',
+    valorParcela: '',
     saldoDevedor: ''
   });
   const [pagamentoForm, setPagamentoForm] = useState({
@@ -55,7 +56,7 @@ function Dividas() {
       carregarDividas();
       setShowForm(false);
       setEditingDivida(null);
-      setFormData({ instituicao: '', valorTotal: '', taxaJuros: '', tipoTaxa: 'MENSAL', saldoDevedor: '' });
+      setFormData({ instituicao: '', valorTotal: '', taxaJuros: '', tipoTaxa: 'MENSAL', valorParcela: '', saldoDevedor: '' });
     } catch (error) {
       alert('Erro ao salvar dívida');
     }
@@ -207,7 +208,7 @@ function Dividas() {
                 <input type="number" step="0.01" value={formData.saldoDevedor} onChange={(e) => setFormData({...formData, saldoDevedor: e.target.value})} required />
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
               <div>
                 <label>Taxa de Juros (%):</label>
                 <input type="number" step="0.01" value={formData.taxaJuros} onChange={(e) => setFormData({...formData, taxaJuros: e.target.value})} required />
@@ -219,9 +220,13 @@ function Dividas() {
                   <option value="ANUAL">Anual (a.a.)</option>
                 </select>
               </div>
+              <div>
+                <label>Valor da Parcela:</label>
+                <input type="number" step="0.01" value={formData.valorParcela} onChange={(e) => setFormData({...formData, valorParcela: e.target.value})} />
+              </div>
             </div>
             <button type="submit" className="btn" style={{ marginRight: '0.5rem' }}>{editingDivida ? 'Atualizar' : 'Salvar'}</button>
-            <button type="button" className="btn" onClick={() => { setShowForm(false); setEditingDivida(null); setFormData({ instituicao: '', valorTotal: '', taxaJuros: '', tipoTaxa: 'MENSAL', saldoDevedor: '' }); }}>Cancelar</button>
+            <button type="button" className="btn" onClick={() => { setShowForm(false); setEditingDivida(null); setFormData({ instituicao: '', valorTotal: '', taxaJuros: '', tipoTaxa: 'MENSAL', valorParcela: '', saldoDevedor: '' }); }}>Cancelar</button>
           </form>
         </div>
       )}
@@ -232,11 +237,12 @@ function Dividas() {
             <h3>{divida.instituicao}</h3>
             <p><strong>Valor Total:</strong> R$ {parseFloat(divida.valorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             <p><strong>Taxa:</strong> {parseFloat(divida.taxaJuros).toFixed(2)}% {divida.tipoTaxa === 'MENSAL' ? 'a.m.' : 'a.a.'}</p>
+            {divida.valorParcela && <p><strong>Parcela:</strong> R$ {parseFloat(divida.valorParcela).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>}
             <p style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#e74c3c' }}>
               Saldo: R$ {parseFloat(divida.saldoDevedor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-              <button onClick={(e) => { e.stopPropagation(); setEditingDivida(divida); setFormData({ instituicao: divida.instituicao, valorTotal: divida.valorTotal, taxaJuros: divida.taxaJuros, tipoTaxa: divida.tipoTaxa, saldoDevedor: divida.saldoDevedor }); setShowForm(true); }} style={{ flex: 1, padding: '0.5rem', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '4px' }}>Editar</button>
+              <button onClick={(e) => { e.stopPropagation(); setEditingDivida(divida); setFormData({ instituicao: divida.instituicao, valorTotal: divida.valorTotal, taxaJuros: divida.taxaJuros, tipoTaxa: divida.tipoTaxa, valorParcela: divida.valorParcela || '', saldoDevedor: divida.saldoDevedor }); setShowForm(true); }} style={{ flex: 1, padding: '0.5rem', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '4px' }}>Editar</button>
               <button onClick={(e) => { e.stopPropagation(); excluirDivida(divida.id); }} style={{ flex: 1, padding: '0.5rem', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '4px' }}>Excluir</button>
             </div>
           </div>
