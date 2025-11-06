@@ -106,35 +106,13 @@ function App() {
                       display: 'block',
                       padding: '0.75rem 1rem',
                       color: '#333',
-                      textDecoration: 'none',
-                      borderBottom: '1px solid #eee'
+                      textDecoration: 'none'
                     }}
                     onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
                     onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
                   >
                     Categorias
                   </a>
-                  <button
-                    onClick={() => {
-                      setShowChangePassword(true);
-                      setShowConfigMenu(false);
-                    }}
-                    style={{
-                      display: 'block',
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      color: '#333',
-                      textDecoration: 'none',
-                      border: 'none',
-                      background: 'none',
-                      textAlign: 'left',
-                      cursor: 'pointer'
-                    }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
-                  >
-                    Alterar Senha
-                  </button>
                 </div>
               )}
             </div>
