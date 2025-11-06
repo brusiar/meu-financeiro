@@ -24,8 +24,19 @@ public class Usuario {
     @NotBlank
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
+
+    @ManyToOne
+    @JoinColumn(name = "pessoa_mesada_id")
+    private Pessoa pessoaMesada;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    public enum Role {
+        ADMIN, USER, MESADA
+    }
 
     // Construtores
     public Usuario() {}
@@ -51,4 +62,10 @@ public class Usuario {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
+
+    public Pessoa getPessoaMesada() { return pessoaMesada; }
+    public void setPessoaMesada(Pessoa pessoaMesada) { this.pessoaMesada = pessoaMesada; }
 }

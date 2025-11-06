@@ -18,6 +18,9 @@ public class AuthController {
     @Value("${spring.security.user.password}")
     private String password;
 
+    @Autowired
+    private com.financeiro.repository.UsuarioRepository usuarioRepository;
+
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> credentials) {
         Map<String, Object> response = new HashMap<>();
@@ -26,8 +29,12 @@ public class AuthController {
         String pass = credentials.get("password");
         
         if (username.equals(user) && password.equals(pass)) {
+            var usuario = usuarioRepository.findByUsername(user);
             response.put("success", true);
             response.put("user", user);
+            response.put("role", usuario.isPresent() ? usuario.get().getRole().toString() : "ADMIN");
+            response.put("pessoaMesada", usuario.isPresent() && usuario.get().getPessoaMesada() != null ? 
+                Map.of("id", usuario.get().getPessoaMesada().getId(), "nome", usuario.get().getPessoaMesada().getNome()) : null);
             return ResponseEntity.ok(response);
         }
         

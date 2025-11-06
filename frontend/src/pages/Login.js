@@ -15,7 +15,11 @@ function Login({ onLogin }) {
       const response = await api.post('/api/auth/login', credentials);
       if (response.data.success) {
         localStorage.setItem('user', response.data.user);
-        onLogin(response.data.user);
+        localStorage.setItem('userRole', response.data.role || 'USER');
+        if (response.data.pessoaMesada) {
+          localStorage.setItem('pessoaMesada', JSON.stringify(response.data.pessoaMesada));
+        }
+        onLogin(response.data.user, response.data.role, response.data.pessoaMesada);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Erro ao fazer login');

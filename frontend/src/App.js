@@ -7,12 +7,15 @@ import Categorias from './pages/Categorias';
 import Rendimentos from './pages/Rendimentos';
 import Mesada from './pages/Mesada';
 import Dividas from './pages/Dividas';
+import Usuarios from './pages/Usuarios';
 import Login from './pages/Login';
 import ChangePassword from './pages/ChangePassword';
 import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+  const [pessoaMesada, setPessoaMesada] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showConfigMenu, setShowConfigMenu] = useState(false);
@@ -20,19 +23,29 @@ function App() {
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
+    const savedRole = localStorage.getItem('userRole');
+    const savedPessoa = localStorage.getItem('pessoaMesada');
     if (savedUser) {
       setUser(savedUser);
+      setUserRole(savedRole || 'USER');
+      setPessoaMesada(savedPessoa ? JSON.parse(savedPessoa) : null);
     }
     setLoading(false);
   }, []);
 
-  const handleLogin = (userData) => {
+  const handleLogin = (userData, role, pessoa) => {
     setUser(userData);
+    setUserRole(role || 'USER');
+    setPessoaMesada(pessoa);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('pessoaMesada');
     setUser(null);
+    setUserRole(null);
+    setPessoaMesada(null);
   };
 
   if (loading) {
@@ -136,13 +149,14 @@ function App() {
         
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/contas" element={<ContasPagar />} />
-            <Route path="/cartoes" element={<Cartoes />} />
-            <Route path="/dividas" element={<Dividas />} />
-            <Route path="/rendimentos" element={<Rendimentos />} />
-            <Route path="/mesada" element={<Mesada />} />
-            <Route path="/categorias" element={<Categorias />} />
+            {userRole !== 'MESADA' && <Route path="/" element={<Dashboard />} />}
+            {userRole !== 'MESADA' && <Route path="/contas" element={<ContasPagar />} />}
+            {userRole !== 'MESADA' && <Route path="/cartoes" element={<Cartoes />} />}
+            {userRole !== 'MESADA' && <Route path="/dividas" element={<Dividas />} />}
+            {userRole !== 'MESADA' && <Route path="/rendimentos" element={<Rendimentos />} />}
+            <Route path="/mesada" element={<Mesada pessoaMesadaId={pessoaMesada?.id} userRole={userRole} />} />
+            {userRole !== 'MESADA' && <Route path="/categorias" element={<Categorias />} />}
+            {userRole === 'ADMIN' && <Route path="/usuarios" element={<Usuarios />} />}
           </Routes>
         </main>
         

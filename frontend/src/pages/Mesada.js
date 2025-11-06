@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 
-function Mesada() {
+function Mesada({ pessoaMesadaId, userRole }) {
   const [pessoas, setPessoas] = useState([]);
   const [pessoaSelecionada, setPessoaSelecionada] = useState(null);
   const [acoes, setAcoes] = useState([]);
@@ -23,7 +23,16 @@ function Mesada() {
   const carregarPessoas = async () => {
     try {
       const response = await api.get(`/api/mesada/pessoas?username=${user}`);
-      setPessoas(response.data);
+      if (userRole === 'MESADA' && pessoaMesadaId) {
+        const pessoaFiltrada = response.data.filter(p => p.id === pessoaMesadaId);
+        setPessoas(pessoaFiltrada);
+        if (pessoaFiltrada.length > 0) {
+          setPessoaSelecionada(pessoaFiltrada[0]);
+          carregarAcoes(pessoaFiltrada[0].id);
+        }
+      } else {
+        setPessoas(response.data);
+      }
     } catch (error) {
       console.error('Erro ao carregar pessoas:', error);
     }
@@ -308,7 +317,7 @@ function Mesada() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
         <h2>Controle de Mesada</h2>
-        <button className="btn" onClick={() => setShowFormPessoa(true)}>Nova Pessoa</button>
+        {userRole !== 'MESADA' && <button className="btn" onClick={() => setShowFormPessoa(true)}>Nova Pessoa</button>}
       </div>
 
       {showFormPessoa && (
@@ -345,12 +354,12 @@ function Mesada() {
                 </p>
                 <p style={{ fontSize: '0.8rem', color: '#666', margin: 0 }}>Valor base da mesada</p>
                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-                  <button onClick={(e) => { e.stopPropagation(); setEditingPessoa(pessoa); setFormPessoa({ nome: pessoa.nome, valorMesada: pessoa.valorMesada }); setShowFormPessoa(true); }} style={{ flex: 1, padding: '0.5rem', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '4px' }}>
+                  {userRole !== 'MESADA' && <button onClick={(e) => { e.stopPropagation(); setEditingPessoa(pessoa); setFormPessoa({ nome: pessoa.nome, valorMesada: pessoa.valorMesada }); setShowFormPessoa(true); }} style={{ flex: 1, padding: '0.5rem', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '4px' }}>
                     Editar
-                  </button>
-                  <button onClick={(e) => { e.stopPropagation(); excluirPessoa(pessoa.id); }} style={{ flex: 1, padding: '0.5rem', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '4px' }}>
+                  </button>}
+                  {userRole !== 'MESADA' && <button onClick={(e) => { e.stopPropagation(); excluirPessoa(pessoa.id); }} style={{ flex: 1, padding: '0.5rem', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '4px' }}>
                     Excluir
-                  </button>
+                  </button>}
                 </div>
               </div>
             ))}
