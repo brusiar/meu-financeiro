@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import ContasPagar from './pages/ContasPagar';
 import Cartoes from './pages/Cartoes';
@@ -150,14 +150,24 @@ function App() {
         
         <main className="main-content">
           <Routes>
-            {userRole !== 'MESADA' && <Route path="/" element={<Dashboard />} />}
-            {userRole !== 'MESADA' && <Route path="/contas" element={<ContasPagar />} />}
-            {userRole !== 'MESADA' && <Route path="/cartoes" element={<Cartoes />} />}
-            {userRole !== 'MESADA' && <Route path="/dividas" element={<Dividas />} />}
-            {userRole !== 'MESADA' && <Route path="/rendimentos" element={<Rendimentos />} />}
-            <Route path="/mesada" element={<Mesada pessoaMesadaId={pessoaMesada?.id} userRole={userRole} />} />
-            {userRole !== 'MESADA' && <Route path="/categorias" element={<Categorias />} />}
-            {userRole === 'ADMIN' && <Route path="/usuarios" element={<Usuarios />} />}
+            {userRole === 'MESADA' ? (
+              <>
+                <Route path="/" element={<Navigate to="/mesada" replace />} />
+                <Route path="/mesada" element={<Mesada pessoaMesadaId={pessoaMesada?.id} userRole={userRole} />} />
+                <Route path="*" element={<Navigate to="/mesada" replace />} />
+              </>
+            ) : (
+              <>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/contas" element={<ContasPagar />} />
+                <Route path="/cartoes" element={<Cartoes />} />
+                <Route path="/dividas" element={<Dividas />} />
+                <Route path="/rendimentos" element={<Rendimentos />} />
+                <Route path="/mesada" element={<Mesada pessoaMesadaId={pessoaMesada?.id} userRole={userRole} />} />
+                <Route path="/categorias" element={<Categorias />} />
+                {userRole === 'ADMIN' && <Route path="/usuarios" element={<Usuarios />} />}
+              </>
+            )}
           </Routes>
         </main>
         
