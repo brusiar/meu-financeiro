@@ -6,6 +6,7 @@ import Cartoes from './pages/Cartoes';
 import Categorias from './pages/Categorias';
 import Rendimentos from './pages/Rendimentos';
 import Mesada from './pages/Mesada';
+import Dividas from './pages/Dividas';
 import Login from './pages/Login';
 import ChangePassword from './pages/ChangePassword';
 import './App.css';
@@ -68,6 +69,7 @@ function App() {
             <a href="/">Home</a>
             <a href="/contas">Contas</a>
             <a href="/cartoes">Cartões</a>
+            <a href="/dividas">Dívidas</a>
             <a href="/rendimentos">Rendimentos</a>
             <a href="/mesada">Mesada</a>
             <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -137,6 +139,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/contas" element={<ContasPagar />} />
             <Route path="/cartoes" element={<Cartoes />} />
+            <Route path="/dividas" element={<Dividas />} />
             <Route path="/rendimentos" element={<Rendimentos />} />
             <Route path="/mesada" element={<Mesada />} />
             <Route path="/categorias" element={<Categorias />} />
