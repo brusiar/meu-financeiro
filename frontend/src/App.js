@@ -65,8 +65,8 @@ function App() {
             </button>
           </div>
           <div className="nav-links" style={{ display: showMobileMenu ? 'flex' : undefined }}>
-            <a href="/">Dashboard</a>
-            <a href="/contas">Contas a Pagar</a>
+            <a href="/">Home</a>
+            <a href="/contas">Contas</a>
             <a href="/cartoes">Cartões</a>
             <a href="/rendimentos">Rendimentos</a>
             <a href="/mesada">Mesada</a>
@@ -85,7 +85,7 @@ function App() {
                   gap: '0.5rem'
                 }}
               >
-                Configurações {showConfigMenu ? '▲' : '▼'}
+                Ajustes {showConfigMenu ? '▲' : '▼'}
               </button>
               {showConfigMenu && (
                 <div style={{
