@@ -7,6 +7,7 @@ import com.financeiro.repository.PessoaRepository;
 import com.financeiro.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -39,6 +40,7 @@ public class MesadaController {
     }
 
     @PostMapping("/pessoas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<?> criarPessoa(@RequestBody Map<String, Object> dados) {
         try {
             var usuario = usuarioRepository.findByUsername(dados.get("username").toString()).orElseThrow();
@@ -56,6 +58,7 @@ public class MesadaController {
     }
 
     @PutMapping("/pessoas/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<?> atualizarPessoa(@PathVariable Long id, @RequestBody Map<String, Object> dados) {
         try {
             Pessoa pessoa = pessoaRepository.findById(id).orElseThrow();
@@ -69,6 +72,7 @@ public class MesadaController {
     }
 
     @DeleteMapping("/pessoas/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<?> excluirPessoa(@PathVariable Long id) {
         try {
             pessoaRepository.deleteById(id);
@@ -95,6 +99,7 @@ public class MesadaController {
     }
 
     @PostMapping("/acoes")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<?> criarAcao(@RequestBody Map<String, Object> dados) {
         try {
             var pessoa = pessoaRepository.findById(Long.valueOf(dados.get("pessoaId").toString())).orElseThrow();
@@ -114,6 +119,7 @@ public class MesadaController {
     }
 
     @PutMapping("/acoes/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<?> atualizarAcao(@PathVariable Long id, @RequestBody Map<String, Object> dados) {
         try {
             AcaoMesada acao = acaoRepository.findById(id).orElseThrow();
@@ -129,6 +135,7 @@ public class MesadaController {
     }
 
     @DeleteMapping("/acoes/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<?> excluirAcao(@PathVariable Long id) {
         try {
             acaoRepository.deleteById(id);
