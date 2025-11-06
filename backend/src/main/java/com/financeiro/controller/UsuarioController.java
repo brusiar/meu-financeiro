@@ -27,13 +27,15 @@ public class UsuarioController {
     public ResponseEntity<?> listar() {
         try {
             var usuarios = usuarioRepository.findAll().stream()
-                .map(u -> Map.of(
-                    "id", u.getId(),
-                    "username", u.getUsername(),
-                    "email", u.getEmail(),
-                    "role", u.getRole().toString(),
-                    "pessoaMesada", u.getPessoaMesada() != null ? Map.of("id", u.getPessoaMesada().getId(), "nome", u.getPessoaMesada().getNome()) : null
-                ))
+                .map(u -> {
+                    var map = new java.util.HashMap<String, Object>();
+                    map.put("id", u.getId());
+                    map.put("username", u.getUsername());
+                    map.put("email", u.getEmail());
+                    map.put("role", u.getRole() != null ? u.getRole().toString() : "USER");
+                    map.put("pessoaMesada", u.getPessoaMesada() != null ? Map.of("id", u.getPessoaMesada().getId(), "nome", u.getPessoaMesada().getNome()) : null);
+                    return map;
+                })
                 .toList();
             return ResponseEntity.ok(usuarios);
         } catch (Exception e) {
