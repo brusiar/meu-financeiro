@@ -51,7 +51,7 @@ function Mesada({ pessoaMesadaId, userRole }) {
     e.preventDefault();
     try {
       if (editingPessoa) {
-        await api.put(`/api/mesada/pessoas/${editingPessoa.id}`, formPessoa);
+        await api.put(`/api/mesada/pessoas/${editingPessoa.id}`, { ...formPessoa, username: user });
         alert('Pessoa atualizada com sucesso!');
       } else {
         await api.post('/api/mesada/pessoas', { ...formPessoa, username: user });
@@ -70,10 +70,10 @@ function Mesada({ pessoaMesadaId, userRole }) {
     e.preventDefault();
     try {
       if (editingAcao) {
-        await api.put(`/api/mesada/acoes/${editingAcao.id}`, formAcao);
+        await api.put(`/api/mesada/acoes/${editingAcao.id}`, { ...formAcao, username: user });
         alert('Ação atualizada com sucesso!');
       } else {
-        await api.post('/api/mesada/acoes', { ...formAcao, pessoaId: pessoaSelecionada.id });
+        await api.post('/api/mesada/acoes', { ...formAcao, pessoaId: pessoaSelecionada.id, username: user });
         alert('Ação registrada com sucesso!');
       }
       setShowFormAcao(false);
@@ -88,7 +88,7 @@ function Mesada({ pessoaMesadaId, userRole }) {
   const excluirPessoa = async (id) => {
     if (!window.confirm('Deseja excluir esta pessoa?')) return;
     try {
-      await api.delete(`/api/mesada/pessoas/${id}`);
+      await api.delete(`/api/mesada/pessoas/${id}?username=${user}`);
       alert('Pessoa excluída!');
       carregarPessoas();
     } catch (error) {
@@ -99,7 +99,7 @@ function Mesada({ pessoaMesadaId, userRole }) {
   const excluirAcao = async (id) => {
     if (!window.confirm('Deseja excluir esta ação?')) return;
     try {
-      await api.delete(`/api/mesada/acoes/${id}`);
+      await api.delete(`/api/mesada/acoes/${id}?username=${user}`);
       alert('Ação excluída!');
       carregarAcoes(pessoaSelecionada.id);
     } catch (error) {

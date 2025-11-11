@@ -2,12 +2,12 @@ package com.financeiro.controller;
 
 import com.financeiro.model.AcaoMesada;
 import com.financeiro.model.Pessoa;
+import com.financeiro.model.Usuario;
 import com.financeiro.repository.AcaoMesadaRepository;
 import com.financeiro.repository.PessoaRepository;
 import com.financeiro.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -40,10 +40,12 @@ public class MesadaController {
     }
 
     @PostMapping("/pessoas")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<?> criarPessoa(@RequestBody Map<String, Object> dados) {
         try {
             var usuario = usuarioRepository.findByUsername(dados.get("username").toString()).orElseThrow();
+            if (usuario.getRole() == Usuario.Role.MESADA) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "message", "Usuário sem permissão"));
+            }
             
             Pessoa pessoa = new Pessoa();
             pessoa.setNome(dados.get("nome").toString());
@@ -58,9 +60,12 @@ public class MesadaController {
     }
 
     @PutMapping("/pessoas/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<?> atualizarPessoa(@PathVariable Long id, @RequestBody Map<String, Object> dados) {
         try {
+            var usuario = usuarioRepository.findByUsername(dados.get("username").toString()).orElseThrow();
+            if (usuario.getRole() == Usuario.Role.MESADA) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "message", "Usuário sem permissão"));
+            }
             Pessoa pessoa = pessoaRepository.findById(id).orElseThrow();
             pessoa.setNome(dados.get("nome").toString());
             pessoa.setValorMesada(new BigDecimal(dados.get("valorMesada").toString()));
@@ -72,9 +77,12 @@ public class MesadaController {
     }
 
     @DeleteMapping("/pessoas/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<?> excluirPessoa(@PathVariable Long id) {
+    public ResponseEntity<?> excluirPessoa(@PathVariable Long id, @RequestParam String username) {
         try {
+            var usuario = usuarioRepository.findByUsername(username).orElseThrow();
+            if (usuario.getRole() == Usuario.Role.MESADA) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "message", "Usuário sem permissão"));
+            }
             pessoaRepository.deleteById(id);
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {
@@ -99,9 +107,12 @@ public class MesadaController {
     }
 
     @PostMapping("/acoes")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<?> criarAcao(@RequestBody Map<String, Object> dados) {
         try {
+            var usuario = usuarioRepository.findByUsername(dados.get("username").toString()).orElseThrow();
+            if (usuario.getRole() == Usuario.Role.MESADA) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "message", "Usuário sem permissão"));
+            }
             var pessoa = pessoaRepository.findById(Long.valueOf(dados.get("pessoaId").toString())).orElseThrow();
             
             AcaoMesada acao = new AcaoMesada();
@@ -119,9 +130,12 @@ public class MesadaController {
     }
 
     @PutMapping("/acoes/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<?> atualizarAcao(@PathVariable Long id, @RequestBody Map<String, Object> dados) {
         try {
+            var usuario = usuarioRepository.findByUsername(dados.get("username").toString()).orElseThrow();
+            if (usuario.getRole() == Usuario.Role.MESADA) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "message", "Usuário sem permissão"));
+            }
             AcaoMesada acao = acaoRepository.findById(id).orElseThrow();
             acao.setDescricao(dados.get("descricao").toString());
             acao.setValor(new BigDecimal(dados.get("valor").toString()));
@@ -135,9 +149,12 @@ public class MesadaController {
     }
 
     @DeleteMapping("/acoes/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<?> excluirAcao(@PathVariable Long id) {
+    public ResponseEntity<?> excluirAcao(@PathVariable Long id, @RequestParam String username) {
         try {
+            var usuario = usuarioRepository.findByUsername(username).orElseThrow();
+            if (usuario.getRole() == Usuario.Role.MESADA) {
+                return ResponseEntity.status(403).body(Map.of("success", false, "message", "Usuário sem permissão"));
+            }
             acaoRepository.deleteById(id);
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {
