@@ -30,8 +30,16 @@ public class MesadaController {
     @GetMapping("/pessoas")
     public ResponseEntity<?> listarPessoas(@RequestParam String username) {
         try {
+            var usuario = usuarioRepository.findByUsername(username).orElseThrow();
             var pessoas = pessoaRepository.findAll().stream()
-                .filter(p -> p.getUsuario().getUsername().equals(username))
+                .filter(p -> {
+                    // Se for MESADA, retorna apenas a pessoa vinculada
+                    if (usuario.getRole() == Usuario.Role.MESADA && usuario.getPessoaMesada() != null) {
+                        return p.getId().equals(usuario.getPessoaMesada().getId());
+                    }
+                    // Caso contrário, retorna as pessoas do usuário
+                    return p.getUsuario().getUsername().equals(username);
+                })
                 .toList();
             return ResponseEntity.ok(pessoas);
         } catch (Exception e) {
