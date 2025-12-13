@@ -47,8 +47,22 @@ public class ContaPagar {
 
     private boolean recorrente = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "forma_pagamento")
+    private FormaPagamento formaPagamento;
+
+    @Column(name = "chave_pix")
+    private String chavePix;
+
+    @Column(name = "anexo_boleto")
+    private String anexoBoleto;
+
     public enum TipoConta {
         FIXA, VARIAVEL, FATURA_CARTAO
+    }
+
+    public enum FormaPagamento {
+        CARTAO_CREDITO, PIX, BOLETO
     }
 
     // Construtores
@@ -98,4 +112,13 @@ public class ContaPagar {
 
     public boolean isRecorrente() { return recorrente; }
     public void setRecorrente(boolean recorrente) { this.recorrente = recorrente; }
+
+    public FormaPagamento getFormaPagamento() { return formaPagamento; }
+    public void setFormaPagamento(FormaPagamento formaPagamento) { this.formaPagamento = formaPagamento; }
+
+    public String getChavePix() { return chavePix; }
+    public void setChavePix(String chavePix) { this.chavePix = chavePix; }
+
+    public String getAnexoBoleto() { return anexoBoleto; }
+    public void setAnexoBoleto(String anexoBoleto) { this.anexoBoleto = anexoBoleto; }
 }

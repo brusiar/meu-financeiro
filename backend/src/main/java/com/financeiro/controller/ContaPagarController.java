@@ -137,15 +137,23 @@ public class ContaPagarController {
             ContaPagar conta = new ContaPagar();
             conta.setDescricao(dados.get("descricao").toString());
             conta.setValor(new BigDecimal(dados.get("valor").toString()));
-            boolean recorrente = Boolean.parseBoolean(dados.get("recorrente").toString());
-            conta.setTipo(recorrente ? ContaPagar.TipoConta.FIXA : ContaPagar.TipoConta.VARIAVEL);
-            conta.setRecorrente(recorrente);
+            conta.setTipo(ContaPagar.TipoConta.VARIAVEL);
             conta.setUsuario(usuario);
             conta.setCategoria(categoria);
             
             LocalDate dataVencimento = LocalDate.parse(dados.get("dataVencimento").toString());
             conta.setDataVencimento(dataVencimento);
             conta.setDiaVencimento(dataVencimento.getDayOfMonth());
+            
+            if (dados.containsKey("formaPagamento")) {
+                conta.setFormaPagamento(ContaPagar.FormaPagamento.valueOf(dados.get("formaPagamento").toString()));
+            }
+            if (dados.containsKey("chavePix") && dados.get("chavePix") != null) {
+                conta.setChavePix(dados.get("chavePix").toString());
+            }
+            if (dados.containsKey("anexoBoleto") && dados.get("anexoBoleto") != null) {
+                conta.setAnexoBoleto(dados.get("anexoBoleto").toString());
+            }
             
             ContaPagar contaSalva = contaRepository.save(conta);
             System.out.println("Conta salva com ID: " + contaSalva.getId());
@@ -165,12 +173,21 @@ public class ContaPagarController {
             
             conta.setDescricao(dados.get("descricao").toString());
             conta.setValor(new BigDecimal(dados.get("valor").toString()));
-            conta.setRecorrente(Boolean.parseBoolean(dados.get("recorrente").toString()));
             conta.setCategoria(categoria);
             
             LocalDate dataVencimento = LocalDate.parse(dados.get("dataVencimento").toString());
             conta.setDataVencimento(dataVencimento);
             conta.setDiaVencimento(dataVencimento.getDayOfMonth());
+            
+            if (dados.containsKey("formaPagamento")) {
+                conta.setFormaPagamento(ContaPagar.FormaPagamento.valueOf(dados.get("formaPagamento").toString()));
+            }
+            if (dados.containsKey("chavePix")) {
+                conta.setChavePix(dados.get("chavePix") != null ? dados.get("chavePix").toString() : null);
+            }
+            if (dados.containsKey("anexoBoleto")) {
+                conta.setAnexoBoleto(dados.get("anexoBoleto") != null ? dados.get("anexoBoleto").toString() : null);
+            }
             
             contaRepository.save(conta);
             return ResponseEntity.ok(Map.of("success", true));

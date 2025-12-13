@@ -15,7 +15,9 @@ function ContasPagar() {
     valor: '',
     dataVencimento: '',
     categoriaId: '',
-    recorrente: false
+    formaPagamento: '',
+    chavePix: '',
+    anexoBoleto: ''
   });
 
   const user = localStorage.getItem('user');
@@ -86,7 +88,9 @@ function ContasPagar() {
         valor: '',
         dataVencimento: '',
         categoriaId: '',
-        recorrente: false
+        formaPagamento: '',
+        chavePix: '',
+        anexoBoleto: ''
       });
     } catch (error) {
       console.error('Erro ao salvar conta:', error);
@@ -301,16 +305,50 @@ function ContasPagar() {
               </div>
             </div>
 
-            <div style={{ marginBottom: '1rem' }}>
-              <label>
-                Conta recorrente
-                <input
-                  type="checkbox"
-                  checked={formData.recorrente}
-                  onChange={(e) => setFormData({...formData, recorrente: e.target.checked})}
-                  style={{ marginLeft: '0.5rem' }}
-                />
-              </label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+              <div>
+                <label>Forma de Pagamento:</label>
+                <select
+                  value={formData.formaPagamento}
+                  onChange={(e) => setFormData({...formData, formaPagamento: e.target.value, chavePix: '', anexoBoleto: ''})}
+                  required
+                >
+                  <option value="">Selecione</option>
+                  <option value="CARTAO_CREDITO">Cartão de Crédito</option>
+                  <option value="PIX">Pix</option>
+                  <option value="BOLETO">Boleto</option>
+                </select>
+              </div>
+              {formData.formaPagamento === 'PIX' && (
+                <div>
+                  <label>Chave Pix:</label>
+                  <input
+                    type="text"
+                    value={formData.chavePix}
+                    onChange={(e) => setFormData({...formData, chavePix: e.target.value})}
+                    placeholder="Digite a chave Pix"
+                  />
+                </div>
+              )}
+              {formData.formaPagamento === 'BOLETO' && (
+                <div>
+                  <label>Anexar Boleto (PDF/JPG):</label>
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setFormData({...formData, anexoBoleto: reader.result});
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             <div>
@@ -325,7 +363,9 @@ function ContasPagar() {
                   valor: '',
                   dataVencimento: '',
                   categoriaId: '',
-                  recorrente: false
+                  formaPagamento: '',
+                  chavePix: '',
+                  anexoBoleto: ''
                 });
               }}>
                 Cancelar
@@ -375,7 +415,21 @@ function ContasPagar() {
               <tbody>
                 {contas.map(conta => (
                   <tr key={conta.id} style={{ borderBottom: '1px solid #eee', backgroundColor: getStatusColor(conta) }}>
-                    <td style={{ padding: '0.5rem' }}>{conta.descricao}</td>
+                    <td style={{ padding: '0.5rem' }}>
+                      {conta.descricao}
+                      {conta.formaPagamento === 'PIX' && conta.chavePix && (
+                        <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.25rem' }}>
+                          Pix: {conta.chavePix}
+                        </div>
+                      )}
+                      {conta.formaPagamento === 'BOLETO' && conta.anexoBoleto && (
+                        <div style={{ marginTop: '0.25rem' }}>
+                          <a href={conta.anexoBoleto} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: '#3498db' }}>
+                            📄 Ver Boleto
+                          </a>
+                        </div>
+                      )}
+                    </td>
                     <td style={{ padding: '0.5rem' }}>{conta.categoria.nome}</td>
                     <td style={{ padding: '0.5rem' }}>{getTipoLabel(conta)}</td>
                     <td style={{ padding: '0.5rem', textAlign: 'right' }}>
@@ -404,7 +458,9 @@ function ContasPagar() {
                             valor: conta.valor,
                             dataVencimento: conta.dataVencimento,
                             categoriaId: conta.categoria.id,
-                            recorrente: conta.recorrente
+                            formaPagamento: conta.formaPagamento || '',
+                            chavePix: conta.chavePix || '',
+                            anexoBoleto: conta.anexoBoleto || ''
                           });
                           setShowForm(true);
                         }}
