@@ -81,7 +81,7 @@ function App() {
           <div className="nav-links" style={{ display: showMobileMenu ? 'flex' : undefined }}>
             {userRole !== 'MESADA' && <a href="/">Home</a>}
             {userRole !== 'MESADA' && <a href="/contas">Contas</a>}
-            {userRole !== 'MESADA' && <a href="/cartoes">Cartões</a>}
+            {/* {userRole !== 'MESADA' && <a href="/cartoes">Cartões</a>} */}
             {userRole !== 'MESADA' && <a href="/dividas">Dívidas</a>}
             {userRole !== 'MESADA' && <a href="/rendimentos">Rendimentos</a>}
             <a href="/mesada">Mesada</a>
@@ -174,7 +174,7 @@ function App() {
               <>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/contas" element={<ContasPagar />} />
-                <Route path="/cartoes" element={<Cartoes />} />
+                {/* <Route path="/cartoes" element={<Cartoes />} /> */}
                 <Route path="/dividas" element={<Dividas />} />
                 <Route path="/rendimentos" element={<Rendimentos />} />
                 <Route path="/mesada" element={<Mesada pessoaMesadaId={pessoaMesada?.id} userRole={userRole} />} />
