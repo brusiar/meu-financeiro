@@ -424,9 +424,16 @@ function ContasPagar() {
                       )}
                       {conta.formaPagamento === 'BOLETO' && conta.anexoBoleto && (
                         <div style={{ marginTop: '0.25rem' }}>
-                          <a href={conta.anexoBoleto} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: '#3498db' }}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const win = window.open();
+                              win.document.write(`<iframe src="${conta.anexoBoleto}" style="width:100%;height:100%;border:none;"></iframe>`);
+                            }}
+                            style={{ fontSize: '0.8rem', color: '#3498db', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                          >
                             📄 Ver Boleto
-                          </a>
+                          </button>
                         </div>
                       )}
                     </td>
