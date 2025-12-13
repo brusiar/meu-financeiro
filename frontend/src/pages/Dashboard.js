@@ -9,33 +9,47 @@ function Dashboard() {
   const [gastosPorCategoria, setGastosPorCategoria] = useState([]);
   const [rendimentos, setRendimentos] = useState([]);
   const [dividas, setDividas] = useState([]);
+  const [resumoMes, setResumoMes] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mesAtual, setMesAtual] = useState(new Date());
 
   const user = localStorage.getItem('user');
 
   useEffect(() => {
     carregarDados();
-  }, []);
+  }, [mesAtual]);
 
   const carregarDados = async () => {
     try {
       setLoading(true);
+      const ano = mesAtual.getFullYear();
+      const mes = mesAtual.getMonth() + 1;
       await Promise.all([
-        carregarGastosPorCategoria(),
+        carregarGastosPorCategoria(ano, mes),
         carregarRendimentos(),
-        carregarDividas()
+        carregarDividas(),
+        carregarResumoMes(ano, mes)
       ]);
     } finally {
       setLoading(false);
     }
   };
 
-  const carregarGastosPorCategoria = async () => {
+  const carregarGastosPorCategoria = async (ano, mes) => {
     try {
-      const response = await api.get(`/api/dashboard/gastos-categoria-atual?username=${user}`);
+      const response = await api.get(`/api/dashboard/gastos-categoria-atual?username=${user}&ano=${ano}&mes=${mes}`);
       setGastosPorCategoria(response.data);
     } catch (error) {
       console.error('Erro ao carregar gastos:', error);
+    }
+  };
+
+  const carregarResumoMes = async (ano, mes) => {
+    try {
+      const response = await api.get(`/api/dashboard/resumo-mes?username=${user}&ano=${ano}&mes=${mes}`);
+      setResumoMes(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar resumo:', error);
     }
   };
 
@@ -126,9 +140,60 @@ function Dashboard() {
     );
   }
 
+  const getMesAno = () => {
+    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    return `${meses[mesAtual.getMonth()]} de ${mesAtual.getFullYear()}`;
+  };
+
+  const voltarMes = () => {
+    const novaData = new Date(mesAtual);
+    novaData.setMonth(novaData.getMonth() - 1);
+    setMesAtual(novaData);
+  };
+
+  const avancarMes = () => {
+    const novaData = new Date(mesAtual);
+    novaData.setMonth(novaData.getMonth() + 1);
+    setMesAtual(novaData);
+  };
+
   return (
     <div>
-      <h2 style={{ marginBottom: '2rem' }}>Dashboard Financeiro</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <h2>Dashboard Financeiro</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button onClick={voltarMes} style={{ padding: '0.5rem 1rem', fontSize: '1.2rem', cursor: 'pointer' }}>←</button>
+          <h3 style={{ margin: 0 }}>{getMesAno()}</h3>
+          <button onClick={avancarMes} style={{ padding: '0.5rem 1rem', fontSize: '1.2rem', cursor: 'pointer' }}>→</button>
+        </div>
+      </div>
+
+      {resumoMes && (
+        <div className="card" style={{ marginBottom: '2rem', backgroundColor: '#f8f9fa' }}>
+          <h3 style={{ marginBottom: '1rem', textAlign: 'center' }}>Resumo do Mês</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', textAlign: 'center' }}>
+            <div>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>Total em Contas</p>
+              <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#e74c3c', margin: '0.5rem 0' }}>
+                R$ {resumoMes.totalContas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+              <p style={{ fontSize: '0.8rem', color: '#666' }}>{resumoMes.quantidadeContas} contas</p>
+            </div>
+            <div>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>Contas Pagas</p>
+              <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#27ae60', margin: '0.5rem 0' }}>
+                {resumoMes.contasPagas}
+              </p>
+            </div>
+            <div>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>Contas Pendentes</p>
+              <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#f39c12', margin: '0.5rem 0' }}>
+                {resumoMes.contasPendentes}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
         

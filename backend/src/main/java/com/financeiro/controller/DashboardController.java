@@ -56,9 +56,12 @@ public class DashboardController {
     }
 
     @GetMapping("/gastos-categoria-atual")
-    public ResponseEntity<?> listarGastosPorCategoriaAtual(@RequestParam String username) {
+    public ResponseEntity<?> listarGastosPorCategoriaAtual(
+            @RequestParam String username,
+            @RequestParam(required = false) Integer ano,
+            @RequestParam(required = false) Integer mes) {
         try {
-            LocalDate mesAtual = LocalDate.now();
+            LocalDate mesAtual = (ano != null && mes != null) ? LocalDate.of(ano, mes, 1) : LocalDate.now();
             LocalDateTime inicio = mesAtual.withDayOfMonth(1).atStartOfDay();
             LocalDateTime fim = mesAtual.withDayOfMonth(mesAtual.lengthOfMonth()).atTime(23, 59, 59);
             
@@ -117,6 +120,41 @@ public class DashboardController {
                 .toList();
             
             return ResponseEntity.ok(gastos);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/resumo-mes")
+    public ResponseEntity<?> resumoMes(
+            @RequestParam String username,
+            @RequestParam(required = false) Integer ano,
+            @RequestParam(required = false) Integer mes) {
+        try {
+            LocalDate mesReferencia = (ano != null && mes != null) ? LocalDate.of(ano, mes, 1) : LocalDate.now();
+            LocalDate inicio = mesReferencia.withDayOfMonth(1);
+            LocalDate fim = mesReferencia.withDayOfMonth(mesReferencia.lengthOfMonth());
+            
+            var contas = contaRepository.findAll().stream()
+                .filter(c -> c.getUsuario().getUsername().equals(username))
+                .filter(c -> !c.getDataVencimento().isBefore(inicio) && !c.getDataVencimento().isAfter(fim))
+                .toList();
+            
+            var totalContas = contas.stream()
+                .map(c -> c.getValor())
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+            
+            var contasPagas = contas.stream().filter(c -> c.isPago()).count();
+            var contasPendentes = contas.stream().filter(c -> !c.isPago()).count();
+            
+            return ResponseEntity.ok(Map.of(
+                "totalContas", totalContas,
+                "quantidadeContas", contas.size(),
+                "contasPagas", contasPagas,
+                "contasPendentes", contasPendentes,
+                "mes", mesReferencia.getMonthValue(),
+                "ano", mesReferencia.getYear()
+            ));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
