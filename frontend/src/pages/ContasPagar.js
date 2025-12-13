@@ -327,6 +327,7 @@ function ContasPagar() {
                     value={formData.chavePix}
                     onChange={(e) => setFormData({...formData, chavePix: e.target.value})}
                     placeholder="Digite a chave Pix"
+                    maxLength={300}
                   />
                 </div>
               )}
