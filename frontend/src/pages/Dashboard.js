@@ -55,7 +55,9 @@ function Dashboard() {
 
   const carregarRendimentos = async () => {
     try {
-      const response = await api.get(`/api/rendimentos?username=${user}`);
+      const ano = mesAtual.getFullYear();
+      const mes = mesAtual.getMonth() + 1;
+      const response = await api.get(`/api/dashboard/rendimentos-mes?username=${user}&ano=${ano}&mes=${mes}`);
       setRendimentos(response.data);
     } catch (error) {
       console.error('Erro ao carregar rendimentos:', error);
