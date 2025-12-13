@@ -26,7 +26,8 @@ function Rendimentos() {
       setRendimentos(response.data);
     } catch (error) {
       console.error('Erro ao carregar rendimentos:', error);
-      alert('Erro ao carregar rendimentos');
+      console.error('Detalhes:', error.response?.data);
+      setRendimentos([]);
     }
   };
 
