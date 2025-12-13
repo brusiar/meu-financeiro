@@ -41,26 +41,6 @@ public class DashboardController {
                     )
                 ));
             
-            var contasPagas = contaRepository.findAll().stream()
-                .filter(c -> c.getUsuario().getUsername().equals(username))
-                .filter(c -> c.isPago())
-                .filter(c -> c.getTipo() != com.financeiro.model.ContaPagar.TipoConta.FATURA_CARTAO)
-                .filter(c -> c.getDataPagamento() != null)
-                .filter(c -> (c.getDataPagamento().isEqual(inicio.toLocalDate()) || c.getDataPagamento().isAfter(inicio.toLocalDate())) && 
-                            (c.getDataPagamento().isEqual(fim.toLocalDate()) || c.getDataPagamento().isBefore(fim.toLocalDate())))
-                .collect(Collectors.groupingBy(
-                    c -> c.getCategoria().getNome(),
-                    Collectors.reducing(
-                        java.math.BigDecimal.ZERO,
-                        c -> c.getValor(),
-                        java.math.BigDecimal::add
-                    )
-                ));
-            
-            contasPagas.forEach((categoria, valor) -> 
-                gastosCartao.merge(categoria, valor, java.math.BigDecimal::add)
-            );
-            
             var gastos = gastosCartao.entrySet().stream()
                 .map(entry -> Map.of(
                     "categoria", entry.getKey(),
@@ -94,26 +74,6 @@ public class DashboardController {
                         java.math.BigDecimal::add
                     )
                 ));
-            
-            var contasPagas = contaRepository.findAll().stream()
-                .filter(c -> c.getUsuario().getUsername().equals(username))
-                .filter(c -> c.isPago())
-                .filter(c -> c.getTipo() != com.financeiro.model.ContaPagar.TipoConta.FATURA_CARTAO)
-                .filter(c -> c.getDataPagamento() != null)
-                .filter(c -> (c.getDataPagamento().isEqual(inicio.toLocalDate()) || c.getDataPagamento().isAfter(inicio.toLocalDate())) && 
-                            (c.getDataPagamento().isEqual(fim.toLocalDate()) || c.getDataPagamento().isBefore(fim.toLocalDate())))
-                .collect(Collectors.groupingBy(
-                    c -> c.getCategoria().getNome(),
-                    Collectors.reducing(
-                        java.math.BigDecimal.ZERO,
-                        c -> c.getValor(),
-                        java.math.BigDecimal::add
-                    )
-                ));
-            
-            contasPagas.forEach((categoria, valor) -> 
-                gastosCartao.merge(categoria, valor, java.math.BigDecimal::add)
-            );
             
             var gastos = gastosCartao.entrySet().stream()
                 .map(entry -> Map.of(
