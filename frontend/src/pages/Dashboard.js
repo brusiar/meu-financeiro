@@ -6,7 +6,6 @@ import api from '../services/api';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function Dashboard() {
-  const [gastosPorCategoria, setGastosPorCategoria] = useState([]);
   const [rendimentos, setRendimentos] = useState([]);
   const [dividas, setDividas] = useState([]);
   const [resumoMes, setResumoMes] = useState(null);
@@ -25,22 +24,12 @@ function Dashboard() {
       const ano = mesAtual.getFullYear();
       const mes = mesAtual.getMonth() + 1;
       await Promise.all([
-        carregarGastosPorCategoria(ano, mes),
         carregarRendimentos(),
         carregarDividas(),
         carregarResumoMes(ano, mes)
       ]);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const carregarGastosPorCategoria = async (ano, mes) => {
-    try {
-      const response = await api.get(`/api/dashboard/gastos-categoria-atual?username=${user}&ano=${ano}&mes=${mes}`);
-      setGastosPorCategoria(response.data);
-    } catch (error) {
-      console.error('Erro ao carregar gastos:', error);
     }
   };
 
@@ -74,16 +63,6 @@ function Dashboard() {
   };
 
   const cores = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e', '#16a085', '#c0392b'];
-
-  const dadosGastos = {
-    labels: gastosPorCategoria.map(g => g.categoria),
-    datasets: [{
-      data: gastosPorCategoria.map(g => parseFloat(g.total)),
-      backgroundColor: cores.slice(0, gastosPorCategoria.length),
-      borderWidth: 2,
-      borderColor: '#fff'
-    }]
-  };
 
   const dadosRendimentos = {
     labels: rendimentos.map(r => r.descricao),
@@ -199,25 +178,6 @@ function Dashboard() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
         
-        {/* Gráfico de Gastos por Categoria */}
-        <div className="card">
-          <h3 style={{ marginBottom: '1rem', textAlign: 'center' }}>Gastos por Categoria</h3>
-          {gastosPorCategoria.length === 0 ? (
-            <p style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>Nenhum gasto registrado</p>
-          ) : (
-            <>
-              <div style={{ height: '300px', marginBottom: '1rem' }}>
-                <Pie data={dadosGastos} options={opcoes} />
-              </div>
-              <div style={{ textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid #ddd' }}>
-                <strong style={{ fontSize: '1.1rem' }}>
-                  Total: R$ {gastosPorCategoria.reduce((sum, g) => sum + parseFloat(g.total), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </strong>
-              </div>
-            </>
-          )}
-        </div>
-
         {/* Gráfico de Rendimentos */}
         <div className="card">
           <h3 style={{ marginBottom: '1rem', textAlign: 'center' }}>Rendimentos</h3>

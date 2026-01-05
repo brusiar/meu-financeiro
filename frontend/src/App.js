@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import ContasPagar from './pages/ContasPagar';
-import Cartoes from './pages/Cartoes';
 import Categorias from './pages/Categorias';
 import Rendimentos from './pages/Rendimentos';
 import Mesada from './pages/Mesada';
@@ -81,7 +80,6 @@ function App() {
           <div className="nav-links" style={{ display: showMobileMenu ? 'flex' : undefined }}>
             {userRole !== 'MESADA' && <a href="/">Home</a>}
             {userRole !== 'MESADA' && <a href="/contas">Contas</a>}
-            {/* {userRole !== 'MESADA' && <a href="/cartoes">Cartões</a>} */}
             {userRole !== 'MESADA' && <a href="/dividas">Dívidas</a>}
             {userRole !== 'MESADA' && <a href="/rendimentos">Rendimentos</a>}
             <a href="/mesada">Mesada</a>
@@ -174,7 +172,6 @@ function App() {
               <>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/contas" element={<ContasPagar />} />
-                {/* <Route path="/cartoes" element={<Cartoes />} /> */}
                 <Route path="/dividas" element={<Dividas />} />
                 <Route path="/rendimentos" element={<Rendimentos />} />
                 <Route path="/mesada" element={<Mesada pessoaMesadaId={pessoaMesada?.id} userRole={userRole} />} />
