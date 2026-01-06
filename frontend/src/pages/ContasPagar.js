@@ -10,6 +10,7 @@ function ContasPagar() {
   const [historicoMensal, setHistoricoMensal] = useState([]);
   const [selectedMes, setSelectedMes] = useState(null);
   const [contasMes, setContasMes] = useState([]);
+  const [mesAtual, setMesAtual] = useState(new Date());
   const [formData, setFormData] = useState({
     descricao: '',
     valor: '',
@@ -26,14 +27,21 @@ function ContasPagar() {
     carregarContas();
     carregarCategorias();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mesAtual]);
 
   const carregarContas = async () => {
     try {
-      const response = await api.get(`/api/contas?username=${user}`);
-      setContas(response.data);
+      const ano = mesAtual.getFullYear();
+      const mes = mesAtual.getMonth() + 1;
+      const response = await api.get(`/api/dashboard/contas-mes?username=${user}&ano=${ano}&mes=${mes}`);
+      const contasComCategoria = await Promise.all(response.data.map(async (conta) => {
+        const detalhes = await api.get(`/api/contas/${conta.id || 0}`);
+        return detalhes.data;
+      }));
+      setContas(contasComCategoria.filter(c => c.id));
     } catch (error) {
       console.error('Erro ao carregar contas:', error);
+      setContas([]);
     }
   };
 
@@ -132,6 +140,23 @@ function ContasPagar() {
   const getTipoLabel = (conta) => {
     if (conta.tipo === 'FATURA_CARTAO') return 'Fatura Cartão';
     return conta.recorrente ? 'Recorrente' : 'Pontual';
+  };
+
+  const getMesAno = () => {
+    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    return `${meses[mesAtual.getMonth()]} de ${mesAtual.getFullYear()}`;
+  };
+
+  const voltarMes = () => {
+    const novaData = new Date(mesAtual);
+    novaData.setMonth(novaData.getMonth() - 1);
+    setMesAtual(novaData);
+  };
+
+  const avancarMes = () => {
+    const novaData = new Date(mesAtual);
+    novaData.setMonth(novaData.getMonth() + 1);
+    setMesAtual(novaData);
   };
 
   if (selectedMes) {
@@ -241,7 +266,10 @@ function ContasPagar() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h2>Contas a Pagar</h2>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button onClick={voltarMes} style={{ padding: '0.5rem 1rem', fontSize: '1.2rem', cursor: 'pointer' }}>←</button>
+          <h3 style={{ margin: 0 }}>{getMesAno()}</h3>
+          <button onClick={avancarMes} style={{ padding: '0.5rem 1rem', fontSize: '1.2rem', cursor: 'pointer' }}>→</button>
           <button className="btn" onClick={() => {
             setShowHistorico(true);
             carregarHistorico();

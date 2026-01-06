@@ -7,6 +7,7 @@ function Rendimentos() {
   const [showHistorico, setShowHistorico] = useState(false);
   const [historico, setHistorico] = useState([]);
   const [editingRendimento, setEditingRendimento] = useState(null);
+  const [mesAtual, setMesAtual] = useState(new Date());
   const [formData, setFormData] = useState({
     descricao: '',
     valor: '',
@@ -18,7 +19,8 @@ function Rendimentos() {
 
   useEffect(() => {
     carregarRendimentos();
-  }, []);
+    carregarHistorico();
+  }, [mesAtual]);
 
   const carregarRendimentos = async () => {
     try {
@@ -72,11 +74,12 @@ function Rendimentos() {
 
   const carregarHistorico = async () => {
     try {
-      const response = await api.get(`/api/rendimentos/historico?username=${user}`);
+      const ano = mesAtual.getFullYear();
+      const mes = mesAtual.getMonth() + 1;
+      const response = await api.get(`/api/dashboard/rendimentos-mes?username=${user}&ano=${ano}&mes=${mes}`);
       setHistorico(response.data);
     } catch (error) {
       console.error('Erro ao carregar histórico:', error);
-      alert('Erro ao carregar histórico');
     }
   };
 
@@ -85,10 +88,28 @@ function Rendimentos() {
       await api.post(`/api/rendimentos/registrar/${id}`);
       alert('Recebimento registrado com sucesso!');
       carregarHistorico();
+      carregarRendimentos();
     } catch (error) {
       console.error('Erro ao registrar recebimento:', error);
       alert('Erro ao registrar recebimento');
     }
+  };
+
+  const getMesAno = () => {
+    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    return `${meses[mesAtual.getMonth()]} de ${mesAtual.getFullYear()}`;
+  };
+
+  const voltarMes = () => {
+    const novaData = new Date(mesAtual);
+    novaData.setMonth(novaData.getMonth() - 1);
+    setMesAtual(novaData);
+  };
+
+  const avancarMes = () => {
+    const novaData = new Date(mesAtual);
+    novaData.setMonth(novaData.getMonth() + 1);
+    setMesAtual(novaData);
   };
 
   const totalRendimentos = rendimentos.reduce((sum, r) => sum + parseFloat(r.valor), 0);
@@ -98,9 +119,14 @@ function Rendimentos() {
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h2>Histórico de Rendimentos</h2>
-          <button className="btn" onClick={() => setShowHistorico(false)}>
-            Voltar
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button onClick={voltarMes} style={{ padding: '0.5rem 1rem', fontSize: '1.2rem', cursor: 'pointer' }}>←</button>
+            <h3 style={{ margin: 0 }}>{getMesAno()}</h3>
+            <button onClick={avancarMes} style={{ padding: '0.5rem 1rem', fontSize: '1.2rem', cursor: 'pointer' }}>→</button>
+            <button className="btn" onClick={() => setShowHistorico(false)}>
+              Voltar
+            </button>
+          </div>
         </div>
 
         <div className="card">
@@ -116,8 +142,6 @@ function Rendimentos() {
                   <tr style={{ borderBottom: '1px solid #ddd' }}>
                     <th style={{ padding: '0.5rem', textAlign: 'left' }}>Descrição</th>
                     <th style={{ padding: '0.5rem', textAlign: 'right' }}>Valor</th>
-                    <th style={{ padding: '0.5rem', textAlign: 'center' }}>Data Recebimento</th>
-                    <th style={{ padding: '0.5rem', textAlign: 'center' }}>Referência</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -126,12 +150,6 @@ function Rendimentos() {
                       <td style={{ padding: '0.5rem' }}>{item.descricao}</td>
                       <td style={{ padding: '0.5rem', textAlign: 'right' }}>
                         R$ {parseFloat(item.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </td>
-                      <td style={{ padding: '0.5rem', textAlign: 'center' }}>
-                        {new Date(item.dataRecebimento + 'T00:00:00').toLocaleDateString('pt-BR')}
-                      </td>
-                      <td style={{ padding: '0.5rem', textAlign: 'center' }}>
-                        {item.mesReferencia}/{item.anoReferencia}
                       </td>
                     </tr>
                   ))}
