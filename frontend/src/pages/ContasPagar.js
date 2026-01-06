@@ -31,14 +31,18 @@ function ContasPagar() {
 
   const carregarContas = async () => {
     try {
+      const response = await api.get(`/api/contas?username=${user}`);
       const ano = mesAtual.getFullYear();
       const mes = mesAtual.getMonth() + 1;
-      const response = await api.get(`/api/dashboard/contas-mes?username=${user}&ano=${ano}&mes=${mes}`);
-      const contasComCategoria = await Promise.all(response.data.map(async (conta) => {
-        const detalhes = await api.get(`/api/contas/${conta.id || 0}`);
-        return detalhes.data;
-      }));
-      setContas(contasComCategoria.filter(c => c.id));
+      const inicio = new Date(ano, mes - 1, 1);
+      const fim = new Date(ano, mes, 0);
+      
+      const contasFiltradas = response.data.filter(conta => {
+        const vencimento = new Date(conta.dataVencimento + 'T00:00:00');
+        return vencimento >= inicio && vencimento <= fim;
+      });
+      
+      setContas(contasFiltradas);
     } catch (error) {
       console.error('Erro ao carregar contas:', error);
       setContas([]);
