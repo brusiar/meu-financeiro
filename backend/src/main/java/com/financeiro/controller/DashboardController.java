@@ -187,4 +187,29 @@ public class DashboardController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
+
+    @GetMapping("/contas-mes")
+    public ResponseEntity<?> contasMes(
+            @RequestParam String username,
+            @RequestParam(required = false) Integer ano,
+            @RequestParam(required = false) Integer mes) {
+        try {
+            LocalDate mesReferencia = (ano != null && mes != null) ? LocalDate.of(ano, mes, 1) : LocalDate.now();
+            LocalDate inicio = mesReferencia.withDayOfMonth(1);
+            LocalDate fim = mesReferencia.withDayOfMonth(mesReferencia.lengthOfMonth());
+            
+            var contas = contaRepository.findAll().stream()
+                .filter(c -> c.getUsuario().getUsername().equals(username))
+                .filter(c -> !c.getDataVencimento().isBefore(inicio) && !c.getDataVencimento().isAfter(fim))
+                .map(c -> Map.of(
+                    "descricao", c.getDescricao(),
+                    "valor", c.getValor()
+                ))
+                .toList();
+            
+            return ResponseEntity.ok(contas);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 }

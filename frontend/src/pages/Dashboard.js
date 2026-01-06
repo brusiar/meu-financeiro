@@ -6,6 +6,7 @@ import api from '../services/api';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function Dashboard() {
+  const [contas, setContas] = useState([]);
   const [rendimentos, setRendimentos] = useState([]);
   const [dividas, setDividas] = useState([]);
   const [resumoMes, setResumoMes] = useState(null);
@@ -24,12 +25,22 @@ function Dashboard() {
       const ano = mesAtual.getFullYear();
       const mes = mesAtual.getMonth() + 1;
       await Promise.all([
+        carregarContas(ano, mes),
         carregarRendimentos(),
         carregarDividas(),
         carregarResumoMes(ano, mes)
       ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const carregarContas = async (ano, mes) => {
+    try {
+      const response = await api.get(`/api/dashboard/contas-mes?username=${user}&ano=${ano}&mes=${mes}`);
+      setContas(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar contas:', error);
     }
   };
 
@@ -63,6 +74,16 @@ function Dashboard() {
   };
 
   const cores = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e', '#16a085', '#c0392b'];
+
+  const dadosContas = {
+    labels: contas.map(c => c.descricao),
+    datasets: [{
+      data: contas.map(c => parseFloat(c.valor)),
+      backgroundColor: cores.slice(0, contas.length),
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  };
 
   const dadosRendimentos = {
     labels: rendimentos.map(r => r.descricao),
@@ -178,6 +199,25 @@ function Dashboard() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
         
+        {/* Gráfico de Contas do Mês */}
+        <div className="card">
+          <h3 style={{ marginBottom: '1rem', textAlign: 'center' }}>Contas do Mês</h3>
+          {contas.length === 0 ? (
+            <p style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>Nenhuma conta cadastrada</p>
+          ) : (
+            <>
+              <div style={{ height: '300px', marginBottom: '1rem' }}>
+                <Pie data={dadosContas} options={opcoes} />
+              </div>
+              <div style={{ textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid #ddd' }}>
+                <strong style={{ fontSize: '1.1rem', color: '#e74c3c' }}>
+                  Total: R$ {contas.reduce((sum, c) => sum + parseFloat(c.valor), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </strong>
+              </div>
+            </>
+          )}
+        </div>
+
         {/* Gráfico de Rendimentos */}
         <div className="card">
           <h3 style={{ marginBottom: '1rem', textAlign: 'center' }}>Rendimentos</h3>
