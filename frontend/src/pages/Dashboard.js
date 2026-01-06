@@ -16,6 +16,11 @@ function Dashboard() {
   const user = localStorage.getItem('user');
 
   useEffect(() => {
+    if (!user) {
+      console.error('Usuário não encontrado no localStorage');
+      setLoading(false);
+      return;
+    }
     carregarDados();
   }, [mesAtual]);
 
@@ -30,6 +35,8 @@ function Dashboard() {
         carregarDividas(),
         carregarResumoMes(ano, mes)
       ]);
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
     } finally {
       setLoading(false);
     }
