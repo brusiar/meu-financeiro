@@ -174,9 +174,11 @@ public class DashboardController {
             
             var rendimentos = historicoRendimentoRepository.findAll().stream()
                 .filter(h -> h.getUsuario().getUsername().equals(username))
-                .filter(h -> h.getAnoReferencia().equals(mesReferencia.getYear()) && 
-                            h.getMesReferencia().equals(mesReferencia.getMonthValue()))
+                .filter(h -> h.getDataRecebimento() != null &&
+                            h.getDataRecebimento().getYear() == mesReferencia.getYear() &&
+                            h.getDataRecebimento().getMonthValue() == mesReferencia.getMonthValue())
                 .map(h -> Map.of(
+                    "id", h.getId(),
                     "descricao", h.getDescricao(),
                     "valor", h.getValor()
                 ))

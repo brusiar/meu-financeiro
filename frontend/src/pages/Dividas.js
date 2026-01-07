@@ -40,7 +40,10 @@ function Dividas() {
 
   const carregarRendimentos = async () => {
     try {
-      const response = await api.get(`/api/rendimentos?username=${user}`);
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+      const mes = hoje.getMonth() + 1;
+      const response = await api.get(`/api/rendimentos?username=${user}&ano=${ano}&mes=${mes}`);
       setRendimentos(response.data);
     } catch (error) {
       console.error('Erro ao carregar rendimentos:', error);

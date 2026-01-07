@@ -28,9 +28,7 @@ public class RendimentoService {
             .toList();
 
         for (FonteRenda renda : rendas) {
-            LocalDate dataRecebimento = hoje.withDayOfMonth(
-                Math.min(renda.getDiaRecebimento(), hoje.lengthOfMonth())
-            );
+            LocalDate dataRecebimento = renda.getDataRecebimento();
 
             HistoricoRendimento historico = new HistoricoRendimento();
             historico.setDescricao(renda.getDescricao());

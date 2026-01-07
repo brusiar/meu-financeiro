@@ -3,6 +3,7 @@ package com.financeiro.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "fontes_renda")
@@ -14,7 +15,7 @@ public class FonteRenda {
     
     private String descricao;
     private BigDecimal valor;
-    private Integer diaRecebimento;
+    private LocalDate dataRecebimento;
     private boolean recorrente;
     
     @ManyToOne
@@ -46,12 +47,12 @@ public class FonteRenda {
         this.valor = valor;
     }
 
-    public Integer getDiaRecebimento() {
-        return diaRecebimento;
+    public LocalDate getDataRecebimento() {
+        return dataRecebimento;
     }
 
-    public void setDiaRecebimento(Integer diaRecebimento) {
-        this.diaRecebimento = diaRecebimento;
+    public void setDataRecebimento(LocalDate dataRecebimento) {
+        this.dataRecebimento = dataRecebimento;
     }
 
     public boolean isRecorrente() {

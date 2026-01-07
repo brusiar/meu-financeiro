@@ -11,8 +11,8 @@ function Rendimentos() {
   const [formData, setFormData] = useState({
     descricao: '',
     valor: '',
-    diaRecebimento: '',
-    recorrente: true
+    recorrente: false,
+    dataRecebimento: new Date().toLocaleDateString('pt-BR')
   });
 
   const user = localStorage.getItem('user');
@@ -24,7 +24,9 @@ function Rendimentos() {
 
   const carregarRendimentos = async () => {
     try {
-      const response = await api.get(`/api/rendimentos?username=${user}`);
+      const ano = mesAtual.getFullYear();
+      const mes = mesAtual.getMonth() + 1;
+      const response = await api.get(`/api/rendimentos?username=${user}&ano=${ano}&mes=${mes}`);
       setRendimentos(response.data);
     } catch (error) {
       console.error('Erro ao carregar rendimentos:', error);
@@ -55,7 +57,7 @@ function Rendimentos() {
 
       setShowForm(false);
       setEditingRendimento(null);
-      setFormData({ descricao: '', valor: '', diaRecebimento: '', recorrente: true });
+      setFormData({ descricao: '', valor: '', recorrente: false, dataRecebimento: new Date().toLocaleDateString('pt-BR') });
       carregarRendimentos();
       carregarHistorico();
     } catch (error) {
@@ -170,7 +172,14 @@ function Rendimentos() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h2>Rendimentos</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <h2>Rendimentos</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button onClick={voltarMes} style={{ padding: '0.5rem 1rem', fontSize: '1.2rem', cursor: 'pointer' }}>←</button>
+            <h3 style={{ margin: 0 }}>{getMesAno()}</h3>
+            <button onClick={avancarMes} style={{ padding: '0.5rem 1rem', fontSize: '1.2rem', cursor: 'pointer' }}>→</button>
+          </div>
+        </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button className="btn" onClick={() => {
             setShowHistorico(true);
@@ -212,13 +221,12 @@ function Rendimentos() {
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
               <div>
-                <label>Dia do Recebimento (1-31):</label>
+                <label>Data do Recebimento:</label>
                 <input
-                  type="number"
-                  min="1"
-                  max="31"
-                  value={formData.diaRecebimento}
-                  onChange={(e) => setFormData({...formData, diaRecebimento: e.target.value})}
+                  type="text"
+                  placeholder="DD/MM/AAAA"
+                  value={formData.dataRecebimento}
+                  onChange={(e) => setFormData({...formData, dataRecebimento: e.target.value})}
                   required
                 />
               </div>
@@ -242,7 +250,7 @@ function Rendimentos() {
               <button type="button" className="btn" onClick={() => {
                 setShowForm(false);
                 setEditingRendimento(null);
-                setFormData({ descricao: '', valor: '', diaRecebimento: '', recorrente: true });
+                setFormData({ descricao: '', valor: '', recorrente: true, dataRecebimento: new Date().toLocaleDateString('pt-BR') });
               }}>
                 Cancelar
               </button>
@@ -271,7 +279,6 @@ function Rendimentos() {
                 <tr style={{ borderBottom: '1px solid #ddd' }}>
                   <th style={{ padding: '0.5rem', textAlign: 'left' }}>Descrição</th>
                   <th style={{ padding: '0.5rem', textAlign: 'right' }}>Valor</th>
-                  <th style={{ padding: '0.5rem', textAlign: 'center' }}>Dia Recebimento</th>
                   <th style={{ padding: '0.5rem', textAlign: 'center' }}>Tipo</th>
                   <th style={{ padding: '0.5rem', textAlign: 'center' }}>Ações</th>
                 </tr>
@@ -284,20 +291,24 @@ function Rendimentos() {
                       R$ {parseFloat(rendimento.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
                     <td style={{ padding: '0.5rem', textAlign: 'center' }}>
-                      Dia {rendimento.diaRecebimento}
-                    </td>
-                    <td style={{ padding: '0.5rem', textAlign: 'center' }}>
                       {rendimento.recorrente ? '🔄 Recorrente' : '📅 Único'}
                     </td>
                     <td style={{ padding: '0.5rem', textAlign: 'center' }}>
                       <button 
                         onClick={() => {
                           setEditingRendimento(rendimento);
+                          const dataArray = rendimento.dataRecebimento;
+                          let dataFormatada;
+                          if (Array.isArray(dataArray) && dataArray.length === 3) {
+                            dataFormatada = `${String(dataArray[2]).padStart(2, '0')}/${String(dataArray[1]).padStart(2, '0')}/${dataArray[0]}`;
+                          } else {
+                            dataFormatada = new Date().toLocaleDateString('pt-BR');
+                          }
                           setFormData({
                             descricao: rendimento.descricao,
                             valor: rendimento.valor,
-                            diaRecebimento: rendimento.diaRecebimento,
-                            recorrente: rendimento.recorrente
+                            recorrente: rendimento.recorrente,
+                            dataRecebimento: dataFormatada
                           });
                           setShowForm(true);
                         }}

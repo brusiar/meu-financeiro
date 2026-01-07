@@ -14,6 +14,7 @@ public class ContaPagar {
     private Long id;
 
     @NotBlank
+    @Column(columnDefinition = "TEXT")
     private String descricao;
 
     @NotNull
@@ -51,10 +52,10 @@ public class ContaPagar {
     @Column(name = "forma_pagamento")
     private FormaPagamento formaPagamento;
 
-    @Column(name = "chave_pix")
+    @Column(name = "chave_pix", columnDefinition = "TEXT")
     private String chavePix;
 
-    @Column(name = "anexo_boleto")
+    @Column(name = "anexo_boleto", columnDefinition = "TEXT")
     private String anexoBoleto;
 
     public enum TipoConta {

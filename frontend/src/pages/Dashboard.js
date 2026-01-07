@@ -174,6 +174,7 @@ function Dashboard() {
           <button onClick={voltarMes} style={{ padding: '0.5rem 1rem', fontSize: '1.2rem', cursor: 'pointer' }}>←</button>
           <h3 style={{ margin: 0 }}>{getMesAno()}</h3>
           <button onClick={avancarMes} style={{ padding: '0.5rem 1rem', fontSize: '1.2rem', cursor: 'pointer' }}>→</button>
+          <button onClick={() => window.print()} className="btn" style={{ backgroundColor: '#9b59b6' }}>📄 Relatório</button>
         </div>
       </div>
 
