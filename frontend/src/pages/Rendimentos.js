@@ -45,14 +45,19 @@ function Rendimentos() {
         await api.put(`/api/rendimentos/${editingRendimento.id}`, dados);
         alert('Rendimento atualizado com sucesso!');
       } else {
-        await api.post('/api/rendimentos', dados);
+        const response = await api.post('/api/rendimentos', dados);
         alert('Rendimento cadastrado com sucesso!');
+        // Registra automaticamente o recebimento
+        if (response.data.id) {
+          await api.post(`/api/rendimentos/registrar/${response.data.id}`);
+        }
       }
 
       setShowForm(false);
       setEditingRendimento(null);
       setFormData({ descricao: '', valor: '', diaRecebimento: '', recorrente: true });
       carregarRendimentos();
+      carregarHistorico();
     } catch (error) {
       console.error('Erro ao salvar rendimento:', error);
       alert('Erro ao salvar rendimento');
@@ -285,12 +290,6 @@ function Rendimentos() {
                       {rendimento.recorrente ? '🔄 Recorrente' : '📅 Único'}
                     </td>
                     <td style={{ padding: '0.5rem', textAlign: 'center' }}>
-                      <button 
-                        onClick={() => registrarRecebimento(rendimento.id)}
-                        style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem', backgroundColor: '#27ae60', color: 'white', border: 'none', borderRadius: '4px' }}
-                      >
-                        Registrar
-                      </button>
                       <button 
                         onClick={() => {
                           setEditingRendimento(rendimento);

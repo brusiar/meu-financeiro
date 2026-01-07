@@ -53,8 +53,8 @@ public class RendimentoController {
             renda.setRecorrente((Boolean) dados.get("recorrente"));
             renda.setUsuario(usuario);
 
-            rendaRepository.save(renda);
-            return ResponseEntity.ok(Map.of("success", true, "message", "Rendimento cadastrado com sucesso"));
+            FonteRenda rendaSalva = rendaRepository.save(renda);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Rendimento cadastrado com sucesso", "id", rendaSalva.getId()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
