@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// Usa o hostname atual para construir a URL da API
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 console.log('API_BASE_URL:', API_BASE_URL);
 
