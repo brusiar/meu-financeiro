@@ -314,33 +314,6 @@ const Dashboard = () => {
           </div>
         </div>
       )}
-
-      {/* Próximos Vencimentos */}
-      <div className="mobile-card">
-        <div className="card-header">
-          <h3 className="card-title">📅 Próximos Vencimentos</h3>
-        </div>
-        
-        {contas.length > 0 ? (
-          contas.slice(0, 3).map((conta) => (
-            <div key={conta.id} className="list-item">
-              <div className="item-header">
-                <span className="item-title">{conta.descricao}</span>
-                <span className="item-value negative">
-                  R$ {conta.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-              <div className="item-details">
-                Categoria: {conta.categoria || 'Não definida'}
-              </div>
-            </div>
-          ))
-        ) : (
-          <div style={{ textAlign: 'center', color: '#6c757d', padding: '1rem' }}>
-            Nenhum vencimento próximo
-          </div>
-        )}
-      </div>
     </div>
   );
 };

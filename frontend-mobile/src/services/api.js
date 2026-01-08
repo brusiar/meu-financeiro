@@ -61,6 +61,13 @@ export const financeService = {
   updateAcaoMesada: (id, data) => api.put(`/api/mesada/acoes/${id}`, data),
   deleteAcaoMesada: (id, username) => api.delete(`/api/mesada/acoes/${id}?username=${username}`),
   getRelatorioMesada: (pessoaId) => api.get(`/api/mesada/relatorio/${pessoaId}`),
+  // Dívidas
+  createDivida: (data) => api.post('/api/dividas', data),
+  updateDivida: (id, data) => api.put(`/api/dividas/${id}`, data),
+  deleteDivida: (id) => api.delete(`/api/dividas/${id}`),
+  getPagamentosDivida: (dividaId) => api.get(`/api/dividas/${dividaId}/pagamentos`),
+  createPagamentoDivida: (dividaId, data) => api.post(`/api/dividas/${dividaId}/pagamentos`, data),
+  deletePagamentoDivida: (id) => api.delete(`/api/dividas/pagamentos/${id}`),
   // Dashboard específicos
   getContasMes: (username, ano, mes) => api.get(`/api/dashboard/contas-mes?username=${username}&ano=${ano}&mes=${mes}`),
   getRendimentosMes: (username, ano, mes) => api.get(`/api/dashboard/rendimentos-mes?username=${username}&ano=${ano}&mes=${mes}`),

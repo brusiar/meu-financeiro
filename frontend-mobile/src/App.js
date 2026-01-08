@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ContasPagar from './pages/ContasPagar';
 import Rendimentos from './pages/Rendimentos';
+import Dividas from './pages/Dividas';
 import Mesada from './pages/Mesada';
 import BottomNav from './components/BottomNav';
 
@@ -73,18 +74,18 @@ function App() {
           </PrivateRoute>
         } />
         
-        <Route path="/mesada" element={
+        <Route path="/dividas" element={
           <PrivateRoute>
             <AppLayout>
-              <Mesada />
+              <Dividas />
             </AppLayout>
           </PrivateRoute>
         } />
         
-        <Route path="/perfil" element={
+        <Route path="/mesada" element={
           <PrivateRoute>
             <AppLayout>
-              <ComingSoon title="👤 Perfil" />
+              <Mesada />
             </AppLayout>
           </PrivateRoute>
         } />
