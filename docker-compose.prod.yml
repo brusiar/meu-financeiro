@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: financeiro-postgres
+    environment:
+      POSTGRES_DB: financeiro_db
+      POSTGRES_USER: financeiro_user
+      POSTGRES_PASSWORD: financeiro_pass_prod_2025
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - financeiro-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U financeiro_user -d financeiro_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: financeiro-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/financeiro_db
+      - SPRING_DATASOURCE_USERNAME=financeiro_user
+      - SPRING_DATASOURCE_PASSWORD=financeiro_pass_prod_2025
+    networks:
+      - financeiro-network
+
+  frontend:
+    build: 
+      context: ./frontend
+      args:
+        - REACT_APP_API_URL=http://carimbo:8080
+    container_name: financeiro-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - financeiro-network
+
+volumes:
+  postgres_data:
+
+networks:
+  financeiro-network:
+    driver: bridge
