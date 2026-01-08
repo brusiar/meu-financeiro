@@ -4,6 +4,9 @@ import './App.css';
 
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import ContasPagar from './pages/ContasPagar';
+import Rendimentos from './pages/Rendimentos';
+import Mesada from './pages/Mesada';
 import BottomNav from './components/BottomNav';
 
 // Componente para verificar autenticação
@@ -57,7 +60,7 @@ function App() {
         <Route path="/contas" element={
           <PrivateRoute>
             <AppLayout>
-              <ComingSoon title="💳 Contas a Pagar" />
+              <ContasPagar />
             </AppLayout>
           </PrivateRoute>
         } />
@@ -65,15 +68,15 @@ function App() {
         <Route path="/rendimentos" element={
           <PrivateRoute>
             <AppLayout>
-              <ComingSoon title="💰 Rendimentos" />
+              <Rendimentos />
             </AppLayout>
           </PrivateRoute>
         } />
         
-        <Route path="/cartoes" element={
+        <Route path="/mesada" element={
           <PrivateRoute>
             <AppLayout>
-              <ComingSoon title="💳 Cartões" />
+              <Mesada />
             </AppLayout>
           </PrivateRoute>
         } />

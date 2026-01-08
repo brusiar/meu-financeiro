@@ -8,7 +8,7 @@ const BottomNav = () => {
     { path: '/dashboard', icon: '🏠', label: 'Início' },
     { path: '/contas', icon: '💳', label: 'Contas' },
     { path: '/rendimentos', icon: '💰', label: 'Renda' },
-    { path: '/cartoes', icon: '💳', label: 'Cartões' },
+    { path: '/mesada', icon: '👶', label: 'Mesada' },
     { path: '/perfil', icon: '👤', label: 'Perfil' },
   ];
 

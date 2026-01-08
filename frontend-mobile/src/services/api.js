@@ -40,11 +40,32 @@ export const authService = {
 
 export const financeService = {
   getDashboard: () => api.get('/api/dashboard'),
-  getContasPagar: () => api.get('/api/contas-pagar'),
-  createContaPagar: (data) => api.post('/api/contas-pagar', data),
+  getContasPagar: () => api.get('/api/contas'),
+  createContaPagar: (data) => api.post('/api/contas', data),
+  updateContaPagar: (id, data) => api.put(`/api/contas/${id}`, data),
+  deleteContaPagar: (id) => api.delete(`/api/contas/${id}`),
+  marcarContaComoPaga: (id) => api.put(`/api/contas/${id}/pagar`),
   getCartoes: () => api.get('/api/cartoes'),
-  getFontesRenda: () => api.get('/api/fontes-renda'),
-  createFonteRenda: (data) => api.post('/api/fontes-renda', data),
+  getFontesRenda: () => api.get('/api/rendimentos'),
+  createFonteRenda: (data) => api.post('/api/rendimentos', data),
+  updateFonteRenda: (id, data) => api.put(`/api/rendimentos/${id}`, data),
+  deleteFonteRenda: (id) => api.delete(`/api/rendimentos/${id}`),
+  getCategorias: () => api.get('/api/categorias'),
+  // Mesada
+  getPessoasMesada: (username) => api.get(`/api/mesada/pessoas?username=${username}`),
+  createPessoaMesada: (data) => api.post('/api/mesada/pessoas', data),
+  updatePessoaMesada: (id, data) => api.put(`/api/mesada/pessoas/${id}`, data),
+  deletePessoaMesada: (id, username) => api.delete(`/api/mesada/pessoas/${id}?username=${username}`),
+  getAcoesMesada: (pessoaId) => api.get(`/api/mesada/acoes/${pessoaId}`),
+  createAcaoMesada: (data) => api.post('/api/mesada/acoes', data),
+  updateAcaoMesada: (id, data) => api.put(`/api/mesada/acoes/${id}`, data),
+  deleteAcaoMesada: (id, username) => api.delete(`/api/mesada/acoes/${id}?username=${username}`),
+  getRelatorioMesada: (pessoaId) => api.get(`/api/mesada/relatorio/${pessoaId}`),
+  // Dashboard específicos
+  getContasMes: (username, ano, mes) => api.get(`/api/dashboard/contas-mes?username=${username}&ano=${ano}&mes=${mes}`),
+  getRendimentosMes: (username, ano, mes) => api.get(`/api/dashboard/rendimentos-mes?username=${username}&ano=${ano}&mes=${mes}`),
+  getResumoMes: (username, ano, mes) => api.get(`/api/dashboard/resumo-mes?username=${username}&ano=${ano}&mes=${mes}`),
+  getDividas: (username) => api.get(`/api/dividas?username=${username}`),
 };
 
 export default api;
