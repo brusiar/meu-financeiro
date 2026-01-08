@@ -39,23 +39,13 @@ const Rendimentos = () => {
 
   const carregarRendimentos = async () => {
     try {
-      const ano = mesAtual.getFullYear();
-      const mes = mesAtual.getMonth() + 1;
       const response = await financeService.getFontesRenda();
-      // Filtrar por mês se necessário
       setRendimentos(response.data);
     } catch (error) {
       console.error('Erro ao carregar rendimentos:', error);
-      // Fallback para dados mock
-      setRendimentos([
-        {
-          id: 1,
-          descricao: 'Salário',
-          valor: 4500.00,
-          recorrente: true,
-          dataRecebimento: '2026-01-05'
-        }
-      ]);
+      console.error('Detalhes do erro:', error.response?.data);
+      // Fallback para lista vazia
+      setRendimentos([]);
     }
   };
 

@@ -60,18 +60,9 @@ const ContasPagar = () => {
       setContas(contasFiltradas);
     } catch (error) {
       console.error('Erro ao carregar contas:', error);
-      // Fallback para dados mock
-      setContas([
-        {
-          id: 1,
-          descricao: 'Cartão de Crédito',
-          valor: 850.00,
-          dataVencimento: '2026-01-15',
-          pago: false,
-          categoria: { id: 1, nome: 'Cartão' },
-          formaPagamento: 'CARTAO_CREDITO'
-        }
-      ]);
+      console.error('Detalhes do erro:', error.response?.data);
+      // Fallback para lista vazia
+      setContas([]);
     }
   };
 

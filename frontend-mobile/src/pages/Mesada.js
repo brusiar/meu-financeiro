@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { financeService } from '../services/api';
 
 const Mesada = () => {
   const [pessoas, setPessoas] = useState([]);

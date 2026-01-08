@@ -40,13 +40,13 @@ export const authService = {
 
 export const financeService = {
   getDashboard: () => api.get('/api/dashboard'),
-  getContasPagar: () => api.get('/api/contas'),
+  getContasPagar: () => api.get(`/api/contas?username=${localStorage.getItem('user') || 'admin'}`),
   createContaPagar: (data) => api.post('/api/contas', data),
   updateContaPagar: (id, data) => api.put(`/api/contas/${id}`, data),
   deleteContaPagar: (id) => api.delete(`/api/contas/${id}`),
   marcarContaComoPaga: (id) => api.put(`/api/contas/${id}/pagar`),
   getCartoes: () => api.get('/api/cartoes'),
-  getFontesRenda: () => api.get('/api/rendimentos'),
+  getFontesRenda: () => api.get(`/api/rendimentos?username=${localStorage.getItem('user') || 'admin'}`),
   createFonteRenda: (data) => api.post('/api/rendimentos', data),
   updateFonteRenda: (id, data) => api.put(`/api/rendimentos/${id}`, data),
   deleteFonteRenda: (id) => api.delete(`/api/rendimentos/${id}`),
