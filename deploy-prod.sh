@@ -9,10 +9,11 @@ docker-compose -f docker-compose.prod.yml down
 # Remove imagens antigas
 echo "🗑️  Removendo imagens antigas..."
 docker rmi $(docker images -q financeiro-*) 2>/dev/null || true
+docker system prune -f
 
 # Rebuild e start
 echo "🔨 Construindo e iniciando containers..."
-docker-compose -f docker-compose.prod.yml up --build -d
+docker-compose -f docker-compose.prod.yml up --build --force-recreate -d
 
 echo "✅ Deploy concluído!"
 echo "🌐 Frontend: http://carimbo:3000"
