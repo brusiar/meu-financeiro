@@ -66,11 +66,8 @@ const Dividas = () => {
 
   const carregarPagamentos = async (dividaId) => {
     try {
-      // Simular carregamento de pagamentos
-      setPagamentos([
-        { id: 1, dataPagamento: '2026-01-05', valorPago: 500.00 },
-        { id: 2, dataPagamento: '2025-12-05', valorPago: 500.00 }
-      ]);
+      const response = await financeService.getPagamentosDivida(dividaId);
+      setPagamentos(response.data);
     } catch (error) {
       console.error('Erro ao carregar pagamentos:', error);
       setPagamentos([]);
@@ -100,24 +97,12 @@ const Dividas = () => {
       const dados = { ...formData, username: user };
       
       if (editingDivida) {
-        // Simular update
-        const dividasAtualizadas = dividas.map(d => 
-          d.id === editingDivida.id ? { ...d, ...dados } : d
-        );
-        setDividas(dividasAtualizadas);
+        await financeService.updateDivida(editingDivida.id, dados);
       } else {
-        // Simular create
-        const novaDivida = {
-          id: Date.now(),
-          ...dados,
-          valorTotal: parseFloat(dados.valorTotal),
-          taxaJuros: parseFloat(dados.taxaJuros),
-          valorParcela: dados.valorParcela ? parseFloat(dados.valorParcela) : 0,
-          saldoDevedor: parseFloat(dados.saldoDevedor)
-        };
-        setDividas([...dividas, novaDivida]);
+        await financeService.createDivida(dados);
       }
       
+      carregarDividas();
       setShowForm(false);
       setEditingDivida(null);
       resetForm();
@@ -130,7 +115,8 @@ const Dividas = () => {
   const excluirDivida = async (id) => {
     if (window.confirm('Deseja excluir esta dívida?')) {
       try {
-        setDividas(dividas.filter(d => d.id !== id));
+        await financeService.deleteDivida(id);
+        carregarDividas();
       } catch (error) {
         console.error('Erro ao excluir dívida:', error);
       }
@@ -140,22 +126,9 @@ const Dividas = () => {
   const salvarPagamento = async (e) => {
     e.preventDefault();
     try {
-      const novoPagamento = {
-        id: Date.now(),
-        ...pagamentoForm,
-        valorPago: parseFloat(pagamentoForm.valorPago)
-      };
-      setPagamentos([...pagamentos, novoPagamento]);
-      
-      // Atualizar saldo devedor
-      const dividasAtualizadas = dividas.map(d => 
-        d.id === selectedDivida.id 
-          ? { ...d, saldoDevedor: d.saldoDevedor - parseFloat(pagamentoForm.valorPago) }
-          : d
-      );
-      setDividas(dividasAtualizadas);
-      setSelectedDivida({...selectedDivida, saldoDevedor: selectedDivida.saldoDevedor - parseFloat(pagamentoForm.valorPago)});
-      
+      await financeService.createPagamentoDivida(selectedDivida.id, pagamentoForm);
+      carregarPagamentos(selectedDivida.id);
+      carregarDividas();
       setShowPagamentoForm(false);
       resetPagamentoForm();
     } catch (error) {
@@ -167,7 +140,9 @@ const Dividas = () => {
   const excluirPagamento = async (id) => {
     if (window.confirm('Deseja excluir este pagamento?')) {
       try {
-        setPagamentos(pagamentos.filter(p => p.id !== id));
+        await financeService.deletePagamentoDivida(id);
+        carregarPagamentos(selectedDivida.id);
+        carregarDividas();
       } catch (error) {
         console.error('Erro ao excluir pagamento:', error);
       }
