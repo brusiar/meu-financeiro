@@ -47,6 +47,19 @@ services:
     networks:
       - financeiro-network
 
+  frontend-mobile:
+    build: ./frontend-mobile
+    container_name: financeiro-frontend-mobile
+    ports:
+      - "3001:3001"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://carimbo:8080
+      - PORT=3001
+    networks:
+      - financeiro-network
+
 volumes:
   postgres_data:
 
