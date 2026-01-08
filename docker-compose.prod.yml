@@ -39,7 +39,7 @@ services:
     build: 
       context: ./frontend
       args:
-        - REACT_APP_API_URL=http://carimbo:8080
+        - REACT_APP_API_URL=http://localhost:8080
     container_name: financeiro-frontend
     ports:
       - "3000:3000"
