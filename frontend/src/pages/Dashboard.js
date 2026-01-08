@@ -103,13 +103,13 @@ function Dashboard() {
   };
 
   const totalRendimentos = rendimentos.reduce((sum, r) => sum + parseFloat(r.valor), 0);
-  const totalDividas = dividas.reduce((sum, d) => sum + parseFloat(d.valorTotal), 0);
-  const rendaLivre = Math.max(0, totalRendimentos - totalDividas);
+  const totalParcelasDividas = dividas.reduce((sum, d) => sum + parseFloat(d.valorParcela || 0), 0);
+  const rendaLivre = Math.max(0, totalRendimentos - totalParcelasDividas);
 
   const dadosDividas = {
-    labels: ['Comprometido com Dívidas', 'Renda Livre'],
+    labels: ['Comprometido com Parcelas', 'Renda Livre'],
     datasets: [{
-      data: [totalDividas, rendaLivre],
+      data: [totalParcelasDividas, rendaLivre],
       backgroundColor: ['#e74c3c', '#27ae60'],
       borderWidth: 2,
       borderColor: '#fff'
@@ -261,13 +261,13 @@ function Dashboard() {
                   <strong style={{ color: '#27ae60' }}>R$ {totalRendimentos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                  <span>Dívidas:</span>
-                  <strong style={{ color: '#e74c3c' }}>R$ {totalDividas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
+                  <span>Parcelas:</span>
+                  <strong style={{ color: '#e74c3c' }}>R$ {totalParcelasDividas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid #ddd' }}>
                   <span>Comprometimento:</span>
-                  <strong style={{ color: totalDividas > totalRendimentos * 0.3 ? '#e74c3c' : '#f39c12' }}>
-                    {totalRendimentos > 0 ? ((totalDividas / totalRendimentos) * 100).toFixed(1) : 0}%
+                  <strong style={{ color: totalParcelasDividas > totalRendimentos * 0.3 ? '#e74c3c' : '#f39c12' }}>
+                    {totalRendimentos > 0 ? ((totalParcelasDividas / totalRendimentos) * 100).toFixed(1) : 0}%
                   </strong>
                 </div>
               </div>
