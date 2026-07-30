@@ -8,10 +8,10 @@ RUN npm install --legacy-peer-deps --no-optional
 
 COPY . .
 
-# Build args para variáveis de ambiente
-ARG REACT_APP_API_URL
-ENV REACT_APP_API_URL=$REACT_APP_API_URL
+RUN npm run build
+
+RUN npm install -g serve
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["serve", "-s", "build", "-l", "3000"]
