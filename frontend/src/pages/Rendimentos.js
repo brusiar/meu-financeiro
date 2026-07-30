@@ -361,7 +361,7 @@ function Rendimentos() {
                 {rendimentos.map(rendimento => (
                   <tr key={rendimento.id} style={{ borderBottom: '1px solid #eee' }}>
                     <td style={{ padding: '0.5rem' }}>
-                        {rendimento.rendimentoRecorrente ? `${rendimento.rendimentoRecorrente.nome} - ${rendimento.descricao}` : rendimento.descricao}
+                        {rendimento.rendimentoRecorrente ? `${rendimento.descricao} - ${rendimento.rendimentoRecorrente.nome}` : rendimento.descricao}
                       </td>
                     <td style={{ padding: '0.5rem', textAlign: 'right' }}>
                       R$ {parseFloat(rendimento.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
