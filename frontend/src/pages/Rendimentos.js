@@ -8,10 +8,15 @@ function Rendimentos() {
   const [historico, setHistorico] = useState([]);
   const [editingRendimento, setEditingRendimento] = useState(null);
   const [mesAtual, setMesAtual] = useState(new Date());
+  const [rendimentosRecorrentes, setRendimentosRecorrentes] = useState([]);
+  const [showCadastroRapido, setShowCadastroRapido] = useState(false);
+  const [cadastroRapidoData, setCadastroRapidoData] = useState({ nome: '', descricao: '' });
   const [formData, setFormData] = useState({
     descricao: '',
     valor: '',
     recorrente: false,
+    tipoCadastro: 'pontual',
+    rendimentoRecorrenteId: '',
     dataRecebimento: new Date().toLocaleDateString('pt-BR')
   });
 
@@ -20,7 +25,30 @@ function Rendimentos() {
   useEffect(() => {
     carregarRendimentos();
     carregarHistorico();
+    carregarRendimentosRecorrentes();
   }, [mesAtual]);
+
+  const carregarRendimentosRecorrentes = async () => {
+    try {
+      const res = await api.get(`/api/rendimentos-recorrentes?username=${user}`);
+      setRendimentosRecorrentes(res.data);
+    } catch (e) {
+      console.error('Erro ao carregar rendimentos recorrentes:', e);
+    }
+  };
+
+  const salvarCadastroRapido = async () => {
+    if (!cadastroRapidoData.nome.trim()) return;
+    try {
+      const res = await api.post('/api/rendimentos-recorrentes', { ...cadastroRapidoData, username: user });
+      await carregarRendimentosRecorrentes();
+      setFormData(prev => ({ ...prev, rendimentoRecorrenteId: String(res.data.id) }));
+      setShowCadastroRapido(false);
+      setCadastroRapidoData({ nome: '', descricao: '' });
+    } catch (e) {
+      alert('Erro ao cadastrar: ' + (e.response?.data?.message || e.message));
+    }
+  };
 
   const carregarRendimentos = async () => {
     try {
@@ -38,9 +66,13 @@ function Rendimentos() {
   const salvarRendimento = async (e) => {
     e.preventDefault();
     try {
+      const rr = rendimentosRecorrentes.find(r => String(r.id) === String(formData.rendimentoRecorrenteId));
       const dados = {
         ...formData,
-        username: user
+        username: user,
+        descricao: formData.descricao,
+        recorrente: formData.tipoCadastro === 'recorrente',
+        rendimentoRecorrenteId: formData.tipoCadastro === 'recorrente' ? formData.rendimentoRecorrenteId : null
       };
 
       if (editingRendimento) {
@@ -57,7 +89,7 @@ function Rendimentos() {
 
       setShowForm(false);
       setEditingRendimento(null);
-      setFormData({ descricao: '', valor: '', recorrente: false, dataRecebimento: new Date().toLocaleDateString('pt-BR') });
+      setFormData({ descricao: '', valor: '', recorrente: false, tipoCadastro: 'pontual', rendimentoRecorrenteId: '', dataRecebimento: new Date().toLocaleDateString('pt-BR') });
       carregarRendimentos();
       carregarHistorico();
     } catch (error) {
@@ -171,6 +203,36 @@ function Rendimentos() {
 
   return (
     <div>
+      {showCadastroRapido && (
+        <div style={{
+          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
+        }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '2rem', width: '100%', maxWidth: '480px', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }} onKeyDown={(e) => e.stopPropagation()}>
+            <h3 style={{ margin: '0 0 1.5rem 0' }}>Novo Pagador Recorrente</h3>
+            <div style={{ marginBottom: '1rem' }}>
+              <label>Nome do Pagador:</label>
+              <input type="text" value={cadastroRapidoData.nome}
+                onChange={(e) => setCadastroRapidoData({ ...cadastroRapidoData, nome: e.target.value })}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); salvarCadastroRapido(); } }}
+                placeholder="Ex: Vivo, Empresa X"
+                autoFocus />
+            </div>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label>Descrição:</label>
+              <input type="text" value={cadastroRapidoData.descricao}
+                onChange={(e) => setCadastroRapidoData({ ...cadastroRapidoData, descricao: e.target.value })}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); salvarCadastroRapido(); } }}
+                placeholder="Opcional" />
+            </div>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button className="btn" style={{ backgroundColor: '#27ae60' }}
+                onClick={salvarCadastroRapido} disabled={!cadastroRapidoData.nome.trim()}>Salvar</button>
+              <button className="btn" onClick={() => { setShowCadastroRapido(false); setCadastroRapidoData({ nome: '', descricao: '' }); }}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <h2>Rendimentos</h2>
@@ -199,13 +261,36 @@ function Rendimentos() {
           <form onSubmit={salvarRendimento}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
               <div>
+                <label>Fonte Pagadora:</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <select
+                    value={formData.rendimentoRecorrenteId || 'pontual'}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormData({ ...formData,
+                        tipoCadastro: val === 'pontual' ? 'pontual' : 'recorrente',
+                        rendimentoRecorrenteId: val === 'pontual' ? '' : val
+                      });
+                    }}
+                    style={{ flex: 1 }}
+                  >
+                    <option value="pontual">Pontual</option>
+                    {rendimentosRecorrentes.map(rr => (
+                      <option key={rr.id} value={rr.id}>{rr.nome}</option>
+                    ))}
+                  </select>
+                  <button type="button"
+                    onClick={() => setShowCadastroRapido(true)}
+                    style={{ padding: '0.5rem', fontSize: '0.8rem', whiteSpace: 'nowrap', backgroundColor: '#27ae60', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                  >+ Novo</button>
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+              <div>
                 <label>Descrição:</label>
-                <input
-                  type="text"
-                  value={formData.descricao}
-                  onChange={(e) => setFormData({...formData, descricao: e.target.value})}
-                  required
-                />
+                <input type="text" value={formData.descricao}
+                  onChange={(e) => setFormData({...formData, descricao: e.target.value})} required />
               </div>
               <div>
                 <label>Valor:</label>
@@ -230,17 +315,6 @@ function Rendimentos() {
                   required
                 />
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', paddingTop: '1.5rem' }}>
-                <label>
-                  Rendimento recorrente
-                  <input
-                    type="checkbox"
-                    checked={formData.recorrente}
-                    onChange={(e) => setFormData({...formData, recorrente: e.target.checked})}
-                    style={{ marginLeft: '0.5rem' }}
-                  />
-                </label>
-              </div>
             </div>
 
             <div>
@@ -250,7 +324,7 @@ function Rendimentos() {
               <button type="button" className="btn" onClick={() => {
                 setShowForm(false);
                 setEditingRendimento(null);
-                setFormData({ descricao: '', valor: '', recorrente: true, dataRecebimento: new Date().toLocaleDateString('pt-BR') });
+                setFormData({ descricao: '', valor: '', recorrente: false, tipoCadastro: 'pontual', rendimentoRecorrenteId: '', dataRecebimento: new Date().toLocaleDateString('pt-BR') });
               }}>
                 Cancelar
               </button>
@@ -286,7 +360,9 @@ function Rendimentos() {
               <tbody>
                 {rendimentos.map(rendimento => (
                   <tr key={rendimento.id} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '0.5rem' }}>{rendimento.descricao}</td>
+                    <td style={{ padding: '0.5rem' }}>
+                        {rendimento.rendimentoRecorrente ? `${rendimento.rendimentoRecorrente.nome} - ${rendimento.descricao}` : rendimento.descricao}
+                      </td>
                     <td style={{ padding: '0.5rem', textAlign: 'right' }}>
                       R$ {parseFloat(rendimento.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
@@ -308,6 +384,8 @@ function Rendimentos() {
                             descricao: rendimento.descricao,
                             valor: rendimento.valor,
                             recorrente: rendimento.recorrente,
+                            tipoCadastro: rendimento.rendimentoRecorrente ? 'recorrente' : 'pontual',
+                            rendimentoRecorrenteId: rendimento.rendimentoRecorrente ? String(rendimento.rendimentoRecorrente.id) : '',
                             dataRecebimento: dataFormatada
                           });
                           setShowForm(true);

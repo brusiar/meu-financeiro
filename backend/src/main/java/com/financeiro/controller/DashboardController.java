@@ -3,6 +3,7 @@ package com.financeiro.controller;
 import com.financeiro.repository.GastoCartaoRepository;
 import com.financeiro.repository.ContaPagarRepository;
 import com.financeiro.repository.ContaRecorrenteRepository;
+import com.financeiro.repository.RendimentoRecorrenteRepository;
 import com.financeiro.repository.HistoricoRendimentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,52 @@ import java.util.stream.Collectors;
 public class DashboardController {
 
     @Autowired
+    private RendimentoRecorrenteRepository rendimentoRecorrenteRepository;
+
+    @Autowired
     private ContaRecorrenteRepository contaRecorrenteRepository;
+
+    @GetMapping("/rendimentos-recorrentes-historico")
+    public ResponseEntity<?> rendimentosRecorrentesHistorico(@RequestParam String username) {
+        try {
+            LocalDate hoje = LocalDate.now();
+            var meses = java.util.stream.IntStream.rangeClosed(0, 5)
+                .mapToObj(i -> hoje.minusMonths(5 - i).withDayOfMonth(1))
+                .toList();
+
+            var labels = meses.stream()
+                .map(m -> m.format(java.time.format.DateTimeFormatter.ofPattern("MMM/yy", new java.util.Locale("pt", "BR"))))
+                .toList();
+
+            var recorrentes = rendimentoRecorrenteRepository.findByUsuarioUsernameOrderByNomeAsc(username);
+
+            var datasets = recorrentes.stream().map(rr -> {
+                var valores = meses.stream().map(mes -> {
+                    LocalDate inicio = mes;
+                    LocalDate fim = mes.withDayOfMonth(mes.lengthOfMonth());
+                    return historicoRendimentoRepository.findAll().stream()
+                        .filter(h -> h.getUsuario().getUsername().equals(username))
+                        .filter(h -> h.getFonteRenda() != null
+                            && h.getFonteRenda().getRendimentoRecorrente() != null
+                            && h.getFonteRenda().getRendimentoRecorrente().getId().equals(rr.getId()))
+                        .filter(h -> h.getDataRecebimento() != null
+                            && !h.getDataRecebimento().isBefore(inicio)
+                            && !h.getDataRecebimento().isAfter(fim))
+                        .map(h -> h.getValor())
+                        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+                }).toList();
+
+                return Map.of(
+                    "nome", rr.getNome(),
+                    "valores", valores
+                );
+            }).toList();
+
+            return ResponseEntity.ok(Map.of("labels", labels, "datasets", datasets));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 
     @Autowired
     private GastoCartaoRepository gastoRepository;

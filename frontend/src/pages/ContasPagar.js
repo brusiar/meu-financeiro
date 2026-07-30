@@ -558,7 +558,7 @@ function ContasPagar() {
           <div>
             <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>Total a Pagar</p>
             <p style={{ margin: '0.5rem 0 0 0', fontSize: '1.5rem', fontWeight: 'bold', color: '#e74c3c' }}>
-              R$ {contas.reduce((sum, c) => sum + parseFloat(c.valor), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              R$ {contas.filter(c => c.formaPagamento !== 'CARTAO_CREDITO').reduce((sum, c) => sum + parseFloat(c.valor), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
           </div>
           <div>

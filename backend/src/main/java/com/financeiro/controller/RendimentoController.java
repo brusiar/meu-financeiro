@@ -5,6 +5,7 @@ import com.financeiro.model.HistoricoRendimento;
 import com.financeiro.model.Usuario;
 import com.financeiro.repository.FonteRendaRepository;
 import com.financeiro.repository.HistoricoRendimentoRepository;
+import com.financeiro.repository.RendimentoRecorrenteRepository;
 import com.financeiro.repository.UsuarioRepository;
 
 import java.time.LocalDate;
@@ -27,6 +28,9 @@ public class RendimentoController {
 
     @Autowired
     private HistoricoRendimentoRepository historicoRepository;
+
+    @Autowired
+    private RendimentoRecorrenteRepository rendimentoRecorrenteRepository;
 
     @GetMapping
     public ResponseEntity<?> listar(
@@ -68,6 +72,10 @@ public class RendimentoController {
             renda.setDataRecebimento(data);
             
             renda.setRecorrente((Boolean) dados.get("recorrente"));
+            if (dados.containsKey("rendimentoRecorrenteId") && dados.get("rendimentoRecorrenteId") != null) {
+                rendimentoRecorrenteRepository.findById(Long.valueOf(dados.get("rendimentoRecorrenteId").toString()))
+                    .ifPresent(renda::setRendimentoRecorrente);
+            }
             renda.setUsuario(usuario);
 
             FonteRenda rendaSalva = rendaRepository.save(renda);
@@ -92,6 +100,12 @@ public class RendimentoController {
             renda.setDataRecebimento(data);
             
             renda.setRecorrente((Boolean) dados.get("recorrente"));
+            if (dados.containsKey("rendimentoRecorrenteId") && dados.get("rendimentoRecorrenteId") != null) {
+                rendimentoRecorrenteRepository.findById(Long.valueOf(dados.get("rendimentoRecorrenteId").toString()))
+                    .ifPresent(renda::setRendimentoRecorrente);
+            } else {
+                renda.setRendimentoRecorrente(null);
+            }
 
             rendaRepository.save(renda);
             return ResponseEntity.ok(Map.of("success", true, "message", "Rendimento atualizado com sucesso"));

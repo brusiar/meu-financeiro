@@ -10,6 +10,7 @@ import Usuarios from './pages/Usuarios';
 import Login from './pages/Login';
 import ChangePassword from './pages/ChangePassword';
 import ContasRecorrentes from './pages/ContasRecorrentes';
+import RendimentosRecorrentes from './pages/RendimentosRecorrentes';
 import './App.css';
 
 function App() {
@@ -114,19 +115,16 @@ function App() {
                   zIndex: 1000,
                   marginTop: '0.5rem'
                 }}>
-                  <a
-                    href="/contas-recorrentes"
-                    style={{
-                      display: 'block',
-                      padding: '0.75rem 1rem',
-                      color: '#333',
-                      textDecoration: 'none'
-                    }}
+                  <a href="/contas-recorrentes"
+                    style={{ display: 'block', padding: '0.75rem 1rem', color: '#333', textDecoration: 'none' }}
                     onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
                     onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
-                  >
-                    Contas Recorrentes
-                  </a>
+                  >Contas Recorrentes</a>
+                  <a href="/rendimentos-recorrentes"
+                    style={{ display: 'block', padding: '0.75rem 1rem', color: '#333', textDecoration: 'none' }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                  >Pagadores Recorrentes</a>
                   <a
                     href="/categorias"
                     style={{
@@ -190,6 +188,7 @@ function App() {
                 <Route path="/rendimentos" element={<Rendimentos />} />
                 <Route path="/mesada" element={<Mesada pessoaMesadaId={pessoaMesada?.id} userRole={userRole} />} />
                 <Route path="/contas-recorrentes" element={<ContasRecorrentes />} />
+                <Route path="/rendimentos-recorrentes" element={<RendimentosRecorrentes />} />
                 <Route path="/categorias" element={<Categorias />} />
                 {userRole === 'ADMIN' && <Route path="/usuarios" element={<Usuarios />} />}
               </>

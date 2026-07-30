@@ -23,6 +23,10 @@ public class FonteRenda {
     @JsonIgnore
     private Usuario usuario;
 
+    @ManyToOne
+    @JoinColumn(name = "rendimento_recorrente_id")
+    private RendimentoRecorrente rendimentoRecorrente;
+
     public Long getId() {
         return id;
     }
@@ -70,4 +74,7 @@ public class FonteRenda {
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
     }
+
+    public RendimentoRecorrente getRendimentoRecorrente() { return rendimentoRecorrente; }
+    public void setRendimentoRecorrente(RendimentoRecorrente rendimentoRecorrente) { this.rendimentoRecorrente = rendimentoRecorrente; }
 }
