@@ -58,6 +58,10 @@ public class ContaPagar {
     @Column(name = "anexo_boleto", columnDefinition = "TEXT")
     private String anexoBoleto;
 
+    @ManyToOne
+    @JoinColumn(name = "conta_recorrente_id")
+    private ContaRecorrente contaRecorrente;
+
     public enum TipoConta {
         FIXA, VARIAVEL, FATURA_CARTAO
     }
@@ -122,4 +126,7 @@ public class ContaPagar {
 
     public String getAnexoBoleto() { return anexoBoleto; }
     public void setAnexoBoleto(String anexoBoleto) { this.anexoBoleto = anexoBoleto; }
+
+    public ContaRecorrente getContaRecorrente() { return contaRecorrente; }
+    public void setContaRecorrente(ContaRecorrente contaRecorrente) { this.contaRecorrente = contaRecorrente; }
 }

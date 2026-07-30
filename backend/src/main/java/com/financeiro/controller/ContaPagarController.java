@@ -3,6 +3,7 @@ package com.financeiro.controller;
 import com.financeiro.model.ContaPagar;
 import com.financeiro.repository.CategoriaRepository;
 import com.financeiro.repository.ContaPagarRepository;
+import com.financeiro.repository.ContaRecorrenteRepository;
 import com.financeiro.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,9 @@ public class ContaPagarController {
 
     @Autowired
     private CategoriaRepository categoriaRepository;
+
+    @Autowired
+    private ContaRecorrenteRepository contaRecorrenteRepository;
 
     @GetMapping
     public List<ContaPagar> listarContas(@RequestParam String username) {
@@ -154,6 +158,11 @@ public class ContaPagarController {
             if (dados.containsKey("anexoBoleto") && dados.get("anexoBoleto") != null) {
                 conta.setAnexoBoleto(dados.get("anexoBoleto").toString());
             }
+            if (dados.containsKey("contaRecorrenteId") && dados.get("contaRecorrenteId") != null) {
+                conta.setRecorrente(true);
+                contaRecorrenteRepository.findById(Long.valueOf(dados.get("contaRecorrenteId").toString()))
+                    .ifPresent(conta::setContaRecorrente);
+            }
             
             ContaPagar contaSalva = contaRepository.save(conta);
             System.out.println("Conta salva com ID: " + contaSalva.getId());
@@ -187,6 +196,14 @@ public class ContaPagarController {
             }
             if (dados.containsKey("anexoBoleto")) {
                 conta.setAnexoBoleto(dados.get("anexoBoleto") != null ? dados.get("anexoBoleto").toString() : null);
+            }
+            if (dados.containsKey("contaRecorrenteId") && dados.get("contaRecorrenteId") != null) {
+                conta.setRecorrente(true);
+                contaRecorrenteRepository.findById(Long.valueOf(dados.get("contaRecorrenteId").toString()))
+                    .ifPresent(conta::setContaRecorrente);
+            } else {
+                conta.setRecorrente(false);
+                conta.setContaRecorrente(null);
             }
             
             contaRepository.save(conta);

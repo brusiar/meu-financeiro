@@ -2,6 +2,7 @@ package com.financeiro.controller;
 
 import com.financeiro.repository.GastoCartaoRepository;
 import com.financeiro.repository.ContaPagarRepository;
+import com.financeiro.repository.ContaRecorrenteRepository;
 import com.financeiro.repository.HistoricoRendimentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,9 @@ import java.util.stream.Collectors;
 public class DashboardController {
 
     @Autowired
+    private ContaRecorrenteRepository contaRecorrenteRepository;
+
+    @Autowired
     private GastoCartaoRepository gastoRepository;
     
     @Autowired
@@ -24,6 +28,43 @@ public class DashboardController {
     
     @Autowired
     private HistoricoRendimentoRepository historicoRendimentoRepository;
+
+    @GetMapping("/contas-recorrentes-historico")
+    public ResponseEntity<?> contasRecorrentesHistorico(@RequestParam String username) {
+        try {
+            LocalDate hoje = LocalDate.now();
+            // Gera os últimos 6 meses (do mais antigo para o mais recente)
+            var meses = java.util.stream.IntStream.rangeClosed(0, 5)
+                .mapToObj(i -> hoje.minusMonths(5 - i).withDayOfMonth(1))
+                .toList();
+
+            var labels = meses.stream()
+                .map(m -> m.format(java.time.format.DateTimeFormatter.ofPattern("MMM/yy", new java.util.Locale("pt", "BR"))))
+                .toList();
+
+            // Busca todas as contas recorrentes do usuário
+            var contasRecorrentes = contaRecorrenteRepository.findByUsuarioUsernameOrderByNomeAsc(username);
+
+            var datasets = contasRecorrentes.stream().map(cr -> {
+                var valores = meses.stream().map(mes -> {
+                    LocalDate inicio = mes;
+                    LocalDate fim = mes.withDayOfMonth(mes.lengthOfMonth());
+                    return contaRepository.findAll().stream()
+                        .filter(c -> c.getUsuario().getUsername().equals(username))
+                        .filter(c -> c.getContaRecorrente() != null && c.getContaRecorrente().getId().equals(cr.getId()))
+                        .filter(c -> !c.getDataVencimento().isBefore(inicio) && !c.getDataVencimento().isAfter(fim))
+                        .map(c -> c.getValor())
+                        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+                }).toList();
+
+                return Map.of("nome", cr.getNome(), "valores", valores);
+            }).toList();
+
+            return ResponseEntity.ok(Map.of("labels", labels, "datasets", datasets));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 
     @GetMapping("/gastos-categoria")
     public ResponseEntity<?> listarGastosPorCategoria(@RequestParam String username) {

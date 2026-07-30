@@ -11,6 +11,9 @@ function ContasPagar() {
   const [selectedMes, setSelectedMes] = useState(null);
   const [contasMes, setContasMes] = useState([]);
   const [mesAtual, setMesAtual] = useState(new Date());
+  const [contasRecorrentes, setContasRecorrentes] = useState([]);
+  const [showCadastroRapido, setShowCadastroRapido] = useState(false);
+  const [cadastroRapidoData, setCadastroRapidoData] = useState({ nome: '', descricao: '', categoriaId: '' });
   const [formData, setFormData] = useState({
     descricao: '',
     valor: '',
@@ -18,7 +21,9 @@ function ContasPagar() {
     categoriaId: '',
     formaPagamento: '',
     chavePix: '',
-    anexoBoleto: ''
+    anexoBoleto: '',
+    tipoCadastro: 'pontual',
+    contaRecorrenteId: ''
   });
 
   const user = localStorage.getItem('user');
@@ -26,8 +31,31 @@ function ContasPagar() {
   useEffect(() => {
     carregarContas();
     carregarCategorias();
+    carregarContasRecorrentes();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mesAtual]);
+
+  const carregarContasRecorrentes = async () => {
+    try {
+      const res = await api.get(`/api/contas-recorrentes?username=${user}`);
+      setContasRecorrentes(res.data);
+    } catch (e) {
+      console.error('Erro ao carregar contas recorrentes:', e);
+    }
+  };
+
+  const salvarCadastroRapido = async () => {
+    if (!cadastroRapidoData.nome.trim()) return;
+    try {
+      const res = await api.post('/api/contas-recorrentes', { ...cadastroRapidoData, username: user });
+      await carregarContasRecorrentes();
+      setFormData(prev => ({ ...prev, contaRecorrenteId: String(res.data.id), categoriaId: res.data.categoriaId ? String(res.data.categoriaId) : prev.categoriaId }));
+      setShowCadastroRapido(false);
+      setCadastroRapidoData({ nome: '', descricao: '', categoriaId: '' });
+    } catch (e) {
+      alert('Erro ao cadastrar: ' + (e.response?.data?.message || e.message));
+    }
+  };
 
   const carregarContas = async () => {
     try {
@@ -81,7 +109,13 @@ function ContasPagar() {
   const salvarConta = async (e) => {
     e.preventDefault();
     try {
-      const dados = { ...formData, username: user };
+      const cr = contasRecorrentes.find(c => String(c.id) === String(formData.contaRecorrenteId));
+      const dados = {
+        ...formData,
+        username: user,
+        descricao: formData.tipoCadastro === 'recorrente' ? (cr?.nome || formData.descricao) : formData.descricao,
+        contaRecorrenteId: formData.tipoCadastro === 'recorrente' ? formData.contaRecorrenteId : null
+      };
       console.log('Enviando dados:', dados);
       
       let response;
@@ -102,7 +136,9 @@ function ContasPagar() {
         categoriaId: '',
         formaPagamento: '',
         chavePix: '',
-        anexoBoleto: ''
+        anexoBoleto: '',
+        tipoCadastro: 'pontual',
+        contaRecorrenteId: ''
       });
     } catch (error) {
       console.error('Erro ao salvar conta:', error);
@@ -268,6 +304,64 @@ function ContasPagar() {
 
   return (
     <div>
+      {showCadastroRapido && (
+        <div style={{
+          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
+        }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '2rem', width: '100%', maxWidth: '480px', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+            <h3 style={{ margin: '0 0 1.5rem 0' }}>Nova Conta Recorrente</h3>
+            <div style={{ marginBottom: '1rem' }}>
+              <label>Nome da Conta:</label>
+              <input
+                type="text"
+                value={cadastroRapidoData.nome}
+                onChange={(e) => setCadastroRapidoData({ ...cadastroRapidoData, nome: e.target.value })}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); salvarCadastroRapido(); } }}
+                autoFocus
+              />
+            </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label>Descrição:</label>
+              <input
+                type="text"
+                value={cadastroRapidoData.descricao}
+                onChange={(e) => setCadastroRapidoData({ ...cadastroRapidoData, descricao: e.target.value })}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); salvarCadastroRapido(); } }}
+                placeholder="Opcional"
+              />
+            </div>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label>Categoria:</label>
+              <select
+                value={cadastroRapidoData.categoriaId}
+                onChange={(e) => setCadastroRapidoData({ ...cadastroRapidoData, categoriaId: e.target.value })}
+              >
+                <option value="">Selecione uma categoria</option>
+                {categorias.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.nome}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button
+                className="btn"
+                style={{ backgroundColor: '#27ae60' }}
+                onClick={salvarCadastroRapido}
+                disabled={!cadastroRapidoData.nome.trim()}
+              >
+                Salvar
+              </button>
+              <button
+                className="btn"
+                onClick={() => { setShowCadastroRapido(false); setCadastroRapidoData({ nome: '', descricao: '' }); }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h2>Contas a Pagar</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -292,14 +386,62 @@ function ContasPagar() {
           <form onSubmit={salvarConta}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
               <div>
-                <label>Descrição:</label>
-                <input
-                  type="text"
-                  value={formData.descricao}
-                  onChange={(e) => setFormData({...formData, descricao: e.target.value})}
-                  required
-                />
+                <label>Tipo de Conta:</label>
+                <select
+                  value={formData.tipoCadastro}
+                  onChange={(e) => setFormData({ ...formData, tipoCadastro: e.target.value, contaRecorrenteId: '' })}
+                >
+                  <option value="pontual">Pontual</option>
+                  <option value="recorrente">Recorrente</option>
+                </select>
               </div>
+              {formData.tipoCadastro === 'recorrente' && (
+                <div>
+                  <label>Conta Recorrente:</label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <select
+                      value={formData.contaRecorrenteId}
+                      onChange={(e) => {
+                        const id = e.target.value;
+                        const cr = contasRecorrentes.find(c => String(c.id) === id);
+                        setFormData(prev => ({
+                          ...prev,
+                          contaRecorrenteId: id,
+                          categoriaId: cr?.categoria ? String(cr.categoria.id) : prev.categoriaId
+                        }));
+                      }}
+                      required
+                      style={{ flex: 1 }}
+                    >
+                      <option value="">Selecione</option>
+                      {contasRecorrentes.map(cr => (
+                        <option key={cr.id} value={cr.id}>{cr.nome}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowCadastroRapido(true)}
+                      style={{ padding: '0.5rem', fontSize: '0.8rem', whiteSpace: 'nowrap', backgroundColor: '#27ae60', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                    >
+                      + Nova
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+              {formData.tipoCadastro === 'pontual' && (
+                <div>
+                  <label>Descrição:</label>
+                  <input
+                    type="text"
+                    value={formData.descricao}
+                    onChange={(e) => setFormData({...formData, descricao: e.target.value})}
+                    required
+                  />
+                </div>
+              )}
               <div>
                 <label>Valor:</label>
                 <input
@@ -391,6 +533,7 @@ function ContasPagar() {
               <button type="button" className="btn" onClick={() => {
                 setShowForm(false);
                 setEditingConta(null);
+                setShowCadastroRapido(false);
                 setFormData({
                   descricao: '',
                   valor: '',
@@ -398,7 +541,9 @@ function ContasPagar() {
                   categoriaId: '',
                   formaPagamento: '',
                   chavePix: '',
-                  anexoBoleto: ''
+                  anexoBoleto: '',
+                  tipoCadastro: 'pontual',
+                  contaRecorrenteId: ''
                 });
               }}>
                 Cancelar
@@ -500,7 +645,9 @@ function ContasPagar() {
                             categoriaId: conta.categoria.id,
                             formaPagamento: conta.formaPagamento || '',
                             chavePix: conta.chavePix || '',
-                            anexoBoleto: conta.anexoBoleto || ''
+                            anexoBoleto: conta.anexoBoleto || '',
+                            tipoCadastro: conta.contaRecorrente ? 'recorrente' : 'pontual',
+                            contaRecorrenteId: conta.contaRecorrente ? String(conta.contaRecorrente.id) : ''
                           });
                           setShowForm(true);
                         }}
