@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement } from 'chart.js';
-import { Pie, Line } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement } from 'chart.js';
+import { Pie } from 'react-chartjs-2';
 import api from '../services/api';
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement);
 
 function Dashboard() {
   const [contas, setContas] = useState([]);
   const [rendimentos, setRendimentos] = useState([]);
   const [dividas, setDividas] = useState([]);
   const [resumoMes, setResumoMes] = useState(null);
-  const [historicoRecorrentes, setHistoricoRecorrentes] = useState(null);
-  const [historicoRendimentosRecorrentes, setHistoricoRendimentosRecorrentes] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mesAtual, setMesAtual] = useState(new Date());
 
@@ -35,32 +33,12 @@ function Dashboard() {
         carregarContas(ano, mes),
         carregarRendimentos(),
         carregarDividas(),
-        carregarResumoMes(ano, mes),
-        carregarHistoricoRecorrentes(),
-        carregarHistoricoRendimentosRecorrentes()
+        carregarResumoMes(ano, mes)
       ]);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const carregarHistoricoRecorrentes = async () => {
-    try {
-      const res = await api.get(`/api/dashboard/contas-recorrentes-historico?username=${user}`);
-      setHistoricoRecorrentes(res.data);
-    } catch (e) {
-      console.error('Erro ao carregar histórico de recorrentes:', e);
-    }
-  };
-
-  const carregarHistoricoRendimentosRecorrentes = async () => {
-    try {
-      const res = await api.get(`/api/dashboard/rendimentos-recorrentes-historico?username=${user}`);
-      setHistoricoRendimentosRecorrentes(res.data);
-    } catch (e) {
-      console.error('Erro ao carregar histórico de rendimentos recorrentes:', e);
     }
   };
 
@@ -297,189 +275,6 @@ function Dashboard() {
           )}
         </div>
       </div>
-
-      {/* Bloco de Contas Recorrentes - um gráfico por conta */}
-      {historicoRecorrentes && historicoRecorrentes.datasets && historicoRecorrentes.datasets.length > 0 && (() => {
-        const cores = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e'];
-        const pluginValoresPontos = {
-          id: 'valoresPontos',
-          afterDatasetsDraw(chart) {
-            const { ctx } = chart;
-            chart.data.datasets.forEach((dataset, i) => {
-              const meta = chart.getDatasetMeta(i);
-              const total = meta.data.length;
-              meta.data.forEach((point, j) => {
-                const valor = dataset.data[j];
-                if (valor === 0) return;
-                ctx.save();
-                ctx.font = 'bold 11px sans-serif';
-                ctx.fillStyle = dataset.borderColor;
-                ctx.textBaseline = 'bottom';
-                if (j === 0) ctx.textAlign = 'left';
-                else if (j === total - 1) ctx.textAlign = 'right';
-                else ctx.textAlign = 'center';
-                ctx.fillText(
-                  `R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-                  point.x,
-                  point.y - 8
-                );
-                ctx.restore();
-              });
-            });
-          }
-        };
-        const opcoesLinha = {
-          responsive: true,
-          maintainAspectRatio: false,
-          layout: { padding: { top: 30 } },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => `R$ ${ctx.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                callback: (v) => `R$ ${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-              }
-            }
-          }
-        };
-        return (
-          <div className="card" style={{ marginBottom: '2rem' }}>
-            <h3 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Contas Recorrentes — Últimos 6 Meses</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              {historicoRecorrentes.datasets.map((ds, i) => {
-                const cor = cores[i % cores.length];
-                const valores = ds.valores.map(v => parseFloat(v));
-                const dadosLinha = {
-                  labels: historicoRecorrentes.labels,
-                  datasets: [{
-                    label: ds.nome,
-                    data: valores,
-                    borderColor: cor,
-                    backgroundColor: cor + '22',
-                    tension: 0.3,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    fill: true
-                  }]
-                };
-                const ultimoValor = valores.filter(v => v > 0).at(-1);
-                return (
-                  <div key={ds.nome} style={{ border: `2px solid ${cor}22`, borderRadius: '8px', padding: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                      <strong style={{ color: cor, fontSize: '1rem' }}>{ds.nome}</strong>
-                      {ultimoValor && (
-                        <span style={{ fontSize: '0.85rem', color: '#666' }}>
-                          Último: <strong style={{ color: cor }}>R$ {ultimoValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
-                        </span>
-                      )}
-                    </div>
-                    <div style={{ height: '280px' }}>
-                      <Line data={dadosLinha} options={opcoesLinha} plugins={[pluginValoresPontos]} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })()}
-      {historicoRendimentosRecorrentes && historicoRendimentosRecorrentes.datasets && historicoRendimentosRecorrentes.datasets.length > 0 && (() => {
-        const cores = ['#27ae60', '#2ecc71', '#1abc9c', '#16a085', '#3498db', '#9b59b6', '#f39c12', '#e67e22'];
-        const pluginValoresPontos = {
-          id: 'valoresPontosRend',
-          afterDatasetsDraw(chart) {
-            const { ctx } = chart;
-            chart.data.datasets.forEach((dataset, i) => {
-              const meta = chart.getDatasetMeta(i);
-              const total = meta.data.length;
-              meta.data.forEach((point, j) => {
-                const valor = dataset.data[j];
-                if (valor === 0) return;
-                ctx.save();
-                ctx.font = 'bold 11px sans-serif';
-                ctx.fillStyle = dataset.borderColor;
-                ctx.textBaseline = 'bottom';
-                if (j === 0) ctx.textAlign = 'left';
-                else if (j === total - 1) ctx.textAlign = 'right';
-                else ctx.textAlign = 'center';
-                ctx.fillText(
-                  `R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-                  point.x, point.y - 8
-                );
-                ctx.restore();
-              });
-            });
-          }
-        };
-        const opcoesLinha = {
-          responsive: true,
-          maintainAspectRatio: false,
-          layout: { padding: { top: 30 } },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => `R$ ${ctx.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { callback: (v) => `R$ ${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` }
-            }
-          }
-        };
-        return (
-          <div className="card" style={{ marginBottom: '2rem' }}>
-            <h3 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Pagadores Recorrentes — Últimos 6 Meses</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              {historicoRendimentosRecorrentes.datasets.map((ds, i) => {
-                const cor = cores[i % cores.length];
-                const valores = ds.valores.map(v => parseFloat(v));
-                const dadosLinha = {
-                  labels: historicoRendimentosRecorrentes.labels,
-                  datasets: [{
-                    label: ds.nome,
-                    data: valores,
-                    borderColor: cor,
-                    backgroundColor: cor + '22',
-                    tension: 0.3,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    fill: true
-                  }]
-                };
-                const ultimoValor = valores.filter(v => v > 0).at(-1);
-                return (
-                  <div key={ds.nome} style={{ border: `2px solid ${cor}22`, borderRadius: '8px', padding: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                      <div>
-                        <strong style={{ color: cor, fontSize: '1rem' }}>{ds.nome}</strong>
-                      </div>
-                      {ultimoValor && (
-                        <span style={{ fontSize: '0.85rem', color: '#666' }}>
-                          Último: <strong style={{ color: cor }}>R$ {ultimoValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
-                        </span>
-                      )}
-                    </div>
-                    <div style={{ height: '280px' }}>
-                      <Line data={dadosLinha} options={opcoesLinha} plugins={[pluginValoresPontos]} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })()}
     </div>
   );
 }

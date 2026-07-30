@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import ChangePassword from './pages/ChangePassword';
 import ContasRecorrentes from './pages/ContasRecorrentes';
 import RendimentosRecorrentes from './pages/RendimentosRecorrentes';
+import Graficos from './pages/Graficos';
 import './App.css';
 
 function App() {
@@ -81,6 +82,7 @@ function App() {
           </div>
           <div className="nav-links" style={{ display: showMobileMenu ? 'flex' : undefined }}>
             {userRole !== 'MESADA' && <a href="/">Home</a>}
+            {userRole !== 'MESADA' && <a href="/graficos">Gráficos</a>}
             {userRole !== 'MESADA' && <a href="/contas">Contas</a>}
             {userRole !== 'MESADA' && <a href="/dividas">Dívidas</a>}
             {userRole !== 'MESADA' && <a href="/rendimentos">Rendimentos</a>}
@@ -187,6 +189,7 @@ function App() {
                 <Route path="/dividas" element={<Dividas />} />
                 <Route path="/rendimentos" element={<Rendimentos />} />
                 <Route path="/mesada" element={<Mesada pessoaMesadaId={pessoaMesada?.id} userRole={userRole} />} />
+                <Route path="/graficos" element={<Graficos />} />
                 <Route path="/contas-recorrentes" element={<ContasRecorrentes />} />
                 <Route path="/rendimentos-recorrentes" element={<RendimentosRecorrentes />} />
                 <Route path="/categorias" element={<Categorias />} />
