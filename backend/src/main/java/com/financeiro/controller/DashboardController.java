@@ -3,6 +3,7 @@ package com.financeiro.controller;
 import com.financeiro.repository.GastoCartaoRepository;
 import com.financeiro.repository.ContaPagarRepository;
 import com.financeiro.repository.ContaRecorrenteRepository;
+import com.financeiro.repository.FonteRendaRepository;
 import com.financeiro.repository.RendimentoRecorrenteRepository;
 import com.financeiro.repository.HistoricoRendimentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,9 @@ public class DashboardController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
+
+    @Autowired
+    private FonteRendaRepository fonteRendaRepository;
 
     @Autowired
     private GastoCartaoRepository gastoRepository;
@@ -258,19 +262,19 @@ public class DashboardController {
             @RequestParam(required = false) Integer mes) {
         try {
             LocalDate mesReferencia = (ano != null && mes != null) ? LocalDate.of(ano, mes, 1) : LocalDate.now();
-            
-            var rendimentos = historicoRendimentoRepository.findAll().stream()
-                .filter(h -> h.getUsuario().getUsername().equals(username))
-                .filter(h -> h.getDataRecebimento() != null &&
-                            h.getDataRecebimento().getYear() == mesReferencia.getYear() &&
-                            h.getDataRecebimento().getMonthValue() == mesReferencia.getMonthValue())
-                .map(h -> Map.of(
-                    "id", h.getId(),
-                    "descricao", h.getDescricao(),
-                    "valor", h.getValor()
+
+            var rendimentos = fonteRendaRepository.findAll().stream()
+                .filter(f -> f.getUsuario().getUsername().equals(username))
+                .filter(f -> f.getDataRecebimento() != null &&
+                            f.getDataRecebimento().getYear() == mesReferencia.getYear() &&
+                            f.getDataRecebimento().getMonthValue() == mesReferencia.getMonthValue())
+                .map(f -> Map.of(
+                    "id", f.getId(),
+                    "descricao", f.getDescricao(),
+                    "valor", f.getValor()
                 ))
                 .toList();
-            
+
             return ResponseEntity.ok(rendimentos);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
